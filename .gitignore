@@ -8,3 +8,14 @@ Desktop.ini
 # Local logs and temporary files
 *.log
 *.tmp
+
+# Local tooling
+.claude/
+
+# Source media kept on disk but not shipped: the hero is a still image now,
+# so the video masters and the intermediate stills are not part of the site.
+assets/*.mp4
+assets/hero-art.png
+assets/hero-still.jpg
+assets/hero-still-alt.jpg
+assets/hero-poster.jpg

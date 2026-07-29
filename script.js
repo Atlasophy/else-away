@@ -67,11 +67,13 @@ let dragging = false;
 let dragMoved = false;
 let dragStart = 0;
 let scrollStart = 0;
+let downCard = null;
 gallery.addEventListener('pointerdown', event => {
   dragging = true;
   dragMoved = false;
   dragStart = event.clientX;
   scrollStart = gallery.scrollLeft;
+  downCard = event.target.closest('.project-card');
   gallery.classList.add('dragging');
   gallery.setPointerCapture(event.pointerId);
   clearInterval(autoTimer);
@@ -85,8 +87,9 @@ gallery.addEventListener('pointermove', event => {
 
 gallery.addEventListener('mouseenter', () => clearInterval(autoTimer));
 gallery.addEventListener('mouseleave', resetAutoPlay);
-track.addEventListener('click', event => {
-  const link = event.target.closest('.project-card');
+gallery.addEventListener('click', event => {
+  const link = event.target.closest('.project-card') || downCard;
+  downCard = null;
   if (!link || dragMoved) {
     if (dragMoved) event.preventDefault();
     return;
@@ -148,6 +151,75 @@ mobileMenu.querySelectorAll('a').forEach(link => link.addEventListener('click', 
   header.classList.remove('menu-open');
   document.body.style.overflow = '';
   if (target) setTimeout(() => target.scrollIntoView({ behavior: 'smooth' }), 40);
+}));
+
+const THEME_KEY = 'elseaway-theme';
+const themeToggle = document.querySelector('[data-theme-toggle]');
+const themeColorMeta = document.querySelector('meta[name="theme-color"]');
+
+function applyTheme(theme) {
+  document.documentElement.dataset.theme = theme;
+  if (themeColorMeta) themeColorMeta.content = theme === 'light' ? '#e9f2ef' : '#120c1c';
+  if (themeToggle) {
+    themeToggle.setAttribute('aria-label', theme === 'light' ? 'Switch to dark mode' : 'Switch to light mode');
+    themeToggle.setAttribute('aria-pressed', String(theme === 'light'));
+  }
+}
+
+applyTheme(document.documentElement.dataset.theme === 'light' ? 'light' : 'dark');
+
+if (themeToggle) {
+  themeToggle.addEventListener('click', () => {
+    const next = document.documentElement.dataset.theme === 'light' ? 'dark' : 'light';
+    applyTheme(next);
+    try { localStorage.setItem(THEME_KEY, next); } catch (error) { /* private mode: theme just won't persist */ }
+  });
+}
+
+const stillPreferred = window.matchMedia('(prefers-reduced-motion: reduce)').matches;
+
+const sparkField = document.querySelector('[data-hero-sparks]');
+if (sparkField && !stillPreferred) {
+  const fragment = document.createDocumentFragment();
+  for (let index = 0; index < 26; index += 1) {
+    const spark = document.createElement('span');
+    // cluster the embers around the crystal, thinning out toward the edges
+    const spread = (Math.random() + Math.random() - 1) * 26;
+    const size = 1.5 + Math.random() * 2;
+    spark.style.left = `${50 + spread}%`;
+    spark.style.width = `${size}px`;
+    spark.style.height = `${size}px`;
+    spark.style.setProperty('--spark-rise', `${-110 - Math.random() * 190}px`);
+    spark.style.setProperty('--spark-opacity', `${0.35 + Math.random() * 0.5}`);
+    spark.style.animationDuration = `${5 + Math.random() * 6}s`;
+    spark.style.animationDelay = `${-Math.random() * 9}s`;
+    fragment.appendChild(spark);
+  }
+  sparkField.appendChild(fragment);
+}
+
+const heroParallax = document.querySelector('[data-hero-parallax]');
+const heroStage = document.querySelector('[data-hero-stage]');
+if (heroParallax && heroStage && !stillPreferred && matchMedia('(hover: hover)').matches) {
+  heroStage.addEventListener('pointermove', event => {
+    const bounds = heroStage.getBoundingClientRect();
+    const offsetX = (event.clientX - bounds.left) / bounds.width - .5;
+    const offsetY = (event.clientY - bounds.top) / bounds.height - .5;
+    heroParallax.style.setProperty('--par-x', `${offsetX * -18}px`);
+    heroParallax.style.setProperty('--par-y', `${offsetY * -12}px`);
+  });
+  heroStage.addEventListener('pointerleave', () => {
+    heroParallax.style.setProperty('--par-x', '0px');
+    heroParallax.style.setProperty('--par-y', '0px');
+  });
+}
+
+document.querySelectorAll('.journal-card').forEach(card => card.addEventListener('click', event => {
+  if (event.target.closest('a')) return;
+  const link = card.querySelector('a');
+  if (!link) return;
+  document.body.classList.add('page-leaving');
+  setTimeout(() => { window.location.href = link.href; }, 420);
 }));
 
 document.querySelector('[data-year]').textContent = new Date().getFullYear();
