@@ -1,27 +1,33 @@
-const seasons = window.ATLAS_STORIES;
+const content = window.ELSE_AWAY;
+const seasonList = content.seasons;
 
 const portfolio = document.querySelector('.portfolio');
 const gallery = document.querySelector('[data-gallery]');
 const track = document.querySelector('[data-gallery-track]');
 const count = document.querySelector('[data-current-count]');
+const total = document.querySelector('[data-total-count]');
 const note = document.querySelector('[data-season-note]');
 const seasonButtons = [...document.querySelectorAll('[data-season-button]')];
-let activeSeason = 'spring';
+let activeSeason = seasonList[0].id;
 let activeIndex = 0;
 let autoTimer;
 
+const seasonById = id => seasonList.find(entry => entry.id === id) || seasonList[0];
+const lastIndex = () => seasonById(activeSeason).projects.length - 1;
+
 function renderSeason(name, animate = true) {
-  activeSeason = name;
+  const data = seasonById(name);
+  activeSeason = data.id;
   activeIndex = 0;
-  const data = seasons[name];
-  portfolio.dataset.season = name;
+  portfolio.dataset.season = data.id;
   note.textContent = data.note;
   count.textContent = '01';
-  seasonButtons.forEach(button => button.setAttribute('aria-selected', String(button.dataset.seasonButton === name)));
+  if (total) total.textContent = String(data.projects.length).padStart(2, '0');
+  seasonButtons.forEach(button => button.setAttribute('aria-selected', String(button.dataset.seasonButton === data.id)));
 
   track.innerHTML = data.projects.map((project, index) => `
-    <a class="project-card" data-project-index="${index}" href="story.html?season=${name}&story=${index}" aria-label="Open story: ${project.title}, ${project.place}">
-      <img class="project-image" src="assets/stories/${name}-${index + 1}.webp" alt="" loading="lazy">
+    <a class="project-card" data-project-index="${index}" href="story.html?season=${data.id}&story=${project.slug}" aria-label="Open story: ${project.title}, ${project.place}">
+      <img class="project-image" src="${project.image}" alt="" loading="lazy">
       <span class="frame-mark" aria-hidden="true">${String(index + 1).padStart(2, '0')}</span>
       <div class="project-info">
         <p>${project.type} · ${project.place}</p>
@@ -46,7 +52,7 @@ function cardStep() {
 }
 
 function goTo(index) {
-  activeIndex = Math.max(0, Math.min(4, index));
+  activeIndex = Math.max(0, Math.min(lastIndex(), index));
   gallery.scrollTo({ left: activeIndex * cardStep(), behavior: 'smooth' });
   count.textContent = String(activeIndex + 1).padStart(2, '0');
   resetAutoPlay();
@@ -58,10 +64,10 @@ function resetAutoPlay() {
 
 seasonButtons.forEach(button => button.addEventListener('click', () => renderSeason(button.dataset.seasonButton)));
 document.querySelector('[data-gallery-prev]').addEventListener('click', () => goTo(activeIndex - 1));
-document.querySelector('[data-gallery-next]').addEventListener('click', () => goTo(activeIndex === 4 ? 0 : activeIndex + 1));
+document.querySelector('[data-gallery-next]').addEventListener('click', () => goTo(activeIndex >= lastIndex() ? 0 : activeIndex + 1));
 gallery.addEventListener('keydown', event => {
   if (event.key === 'ArrowLeft') goTo(activeIndex - 1);
-  if (event.key === 'ArrowRight') goTo(activeIndex === 4 ? 0 : activeIndex + 1);
+  if (event.key === 'ArrowRight') goTo(activeIndex >= lastIndex() ? 0 : activeIndex + 1);
 });
 
 let dragging = false;
@@ -99,39 +105,40 @@ track.addEventListener('click', event => {
 gallery.addEventListener('pointerup', () => {
   dragging = false;
   gallery.classList.remove('dragging');
-  activeIndex = Math.max(0, Math.min(4, Math.round(gallery.scrollLeft / cardStep())));
+  activeIndex = Math.max(0, Math.min(lastIndex(), Math.round(gallery.scrollLeft / cardStep())));
   goTo(activeIndex);
 });
 
 const reduceMotion = window.matchMedia('(prefers-reduced-motion: reduce)');
 
-/* Give every postcard a written back. The words come from the story it links
-   to, so the card and the story it opens never drift out of sync. */
+/* Postcards render from the content layer, and the written side takes its
+   words from the story the card opens, so the two cannot drift apart.
+   One link wraps both faces: two links would mean two tab stops per card,
+   one of them facing away from the reader. */
 const journalSet = document.querySelector('[data-journal-set]');
 if (journalSet) {
-  journalSet.querySelectorAll('.journal-card').forEach(card => {
-    const link = card.querySelector('a');
-    if (!link) return;
-    const params = new URLSearchParams(link.getAttribute('href').split('?')[1] || '');
-    const story = seasons[params.get('season')]?.projects[Number(params.get('story'))];
-    if (!story) return;
-
-    const inner = document.createElement('div');
-    inner.className = 'journal-card-inner';
-    const front = document.createElement('div');
-    front.className = 'journal-front';
-    while (card.firstChild) front.appendChild(card.firstChild);
-
-    const back = document.createElement('div');
-    back.className = 'journal-back';
-    back.innerHTML = `
-      <div class="journal-postmark" aria-hidden="true">${story.place}<br>${story.type}</div>
-      <p class="journal-note">${story.deck}</p>
-      <a href="${link.getAttribute('href')}">Enter field note <span aria-hidden="true">→</span></a>
-    `;
-    inner.append(front, back);
-    card.appendChild(inner);
-  });
+  journalSet.innerHTML = content.postcards.map(card => {
+    const season = seasonById(card.season);
+    const story = season.projects.find(project => project.slug === card.story) || season.projects[0];
+    return `
+      <article class="journal-card">
+        <a class="journal-card-link" href="story.html?season=${season.id}&story=${story.slug}">
+          <div class="journal-card-inner">
+            <div class="journal-front">
+              <div class="journal-image" style="--journal-image:url('${card.image}')" aria-hidden="true"></div>
+              <p class="post-meta">${card.meta}</p>
+              <h3>${card.title}</h3>
+              <span class="journal-cta">Enter field note <span aria-hidden="true">→</span></span>
+            </div>
+            <div class="journal-back">
+              <span class="journal-postmark" aria-hidden="true">${story.place}<br>${story.type}</span>
+              <p class="journal-note">${story.deck}</p>
+              <span class="journal-cta">Enter field note <span aria-hidden="true">→</span></span>
+            </div>
+          </div>
+        </a>
+      </article>`;
+  }).join('');
 }
 
 const journalTrack = document.querySelector('[data-journal-track]');

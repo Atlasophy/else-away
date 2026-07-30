@@ -37,7 +37,7 @@ button { color: inherit; font: inherit; }
 /* Every interactive element gets a visible focus ring. Colour comes from
    currentColor so it stays legible on paper, green and coffee grounds alike. */
 :where(a, button, [tabindex]):focus-visible { outline: 2px solid currentColor; outline-offset: 4px; border-radius: 1px; }
-.project-card:focus-visible, .journal-card a:focus-visible { outline: 2px solid var(--amber-soft); outline-offset: 5px; }
+.project-card:focus-visible, .journal-card-link:focus-visible { outline: 2px solid var(--amber-soft); outline-offset: 5px; }
 
 /* Grain sits over everything at low opacity and drifts a frame at a time, the
    way projected film never holds perfectly still. */
@@ -204,15 +204,16 @@ h1 em, h2 em { font-weight: 400; }
 .journal-back { position: absolute; inset: 0; display: flex; flex-direction: column; justify-content: space-between; padding: 26px 22px 22px; color: #3b2f22; background: #efe6d4; transform: rotateY(180deg); box-shadow: var(--shadow-print); }
 /* Airmail edging, drawn rather than imported. */
 .journal-back::before { content: ""; position: absolute; inset: 0; padding: 6px; pointer-events: none; background: repeating-linear-gradient(45deg, #a8443a 0 9px, #efe6d4 9px 18px, #3f5c73 18px 27px, #efe6d4 27px 36px); -webkit-mask: linear-gradient(#000 0 0) content-box exclude, linear-gradient(#000 0 0); mask: linear-gradient(#000 0 0) content-box exclude, linear-gradient(#000 0 0); }
-.journal-postmark { align-self: flex-end; display: grid; place-items: center; width: 74px; height: 74px; border: 1px solid rgba(59,47,34,.5); border-radius: 50%; color: rgba(59,47,34,.72); font: 500 7px/1.35 var(--mono); letter-spacing: .1em; text-align: center; text-transform: uppercase; transform: rotate(-11deg); }
+.journal-postmark { align-self: flex-end; display: grid; place-items: center; flex: 0 0 auto; width: 74px; height: 74px; border: 1px solid rgba(59,47,34,.5); border-radius: 50%; color: rgba(59,47,34,.72); font: 500 7px/1.35 var(--mono); letter-spacing: .1em; text-align: center; text-transform: uppercase; transform: rotate(-11deg); }
 .journal-note { margin: 0; font: italic 16px/1.5 var(--serif); }
-.journal-back > a { display: inline-flex; justify-content: space-between; align-items: center; padding-top: 12px; border-top: 1px solid rgba(59,47,34,.32); color: #3b2f22; font: 500 8px/1 var(--mono); letter-spacing: .15em; text-transform: uppercase; }
+.journal-back .journal-cta { display: flex; justify-content: space-between; align-items: center; padding-top: 12px; border-top: 1px solid rgba(59,47,34,.32); color: #3b2f22; font: 500 8px/1 var(--mono); letter-spacing: .15em; text-transform: uppercase; }
 .journal-card:nth-child(3n+2) { transform: translateY(12px); }
 .journal-image { aspect-ratio: 1.14; background: var(--journal-image) center / cover no-repeat; box-shadow: 0 24px 55px rgba(0,0,0,.28); transition: transform .6s cubic-bezier(.2,.65,.25,1), filter .4s; }
 .journal-card:hover .journal-image { transform: translateY(-5px) scale(1.015); filter: brightness(1.05); }
 .post-meta { margin: 17px 0 10px; color: #b6c2ad; font-family: var(--mono); font-size: 8px; letter-spacing: .17em; text-transform: uppercase; }
 .journal-card h3 { max-width: 315px; min-height: 50px; margin: 0 0 18px; color: var(--cream); font: 22px/1.12 var(--serif); }
-.journal-card > a { display: inline-flex; gap: 25px; padding-bottom: 5px; border-bottom: 1px solid rgba(241,234,220,.55); color: rgba(241,234,220,.82); font-size: 8px; font-weight: 600; letter-spacing: .15em; text-transform: uppercase; }
+.journal-card-link { display: block; }
+.journal-front .journal-cta { display: inline-flex; gap: 25px; padding-bottom: 5px; border-bottom: 1px solid rgba(241,234,220,.55); color: rgba(241,234,220,.82); font-size: 8px; font-weight: 600; letter-spacing: .15em; text-transform: uppercase; }
 
 .contact { position: relative; min-height: 780px; display: flex; flex-direction: column; justify-content: space-between; padding: 130px 4.5vw 35px; color: var(--cream); background: var(--coffee); overflow: hidden; }
 .contact::before { content: ""; position: absolute; width: 42vw; height: 42vw; max-width: 650px; max-height: 650px; right: -8vw; top: -14vw; border: 1px solid rgba(241,234,220,.11); border-radius: 50%; box-shadow: 0 0 0 90px rgba(241,234,220,.025), 0 0 0 180px rgba(241,234,220,.02); }

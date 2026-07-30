@@ -1,17 +1,24 @@
-const allStories = window.ATLAS_STORIES;
+const allSeasons = window.ELSE_AWAY.seasons;
 const query = new URLSearchParams(window.location.search);
-const requestedSeason = query.get('season');
-const seasonName = allStories[requestedSeason] ? requestedSeason : 'spring';
-const season = allStories[seasonName];
-const requestedIndex = Number.parseInt(query.get('story'), 10);
-const storyIndex = Number.isInteger(requestedIndex) && requestedIndex >= 0 && requestedIndex < season.projects.length ? requestedIndex : 0;
+const season = allSeasons.find(entry => entry.id === query.get('season')) || allSeasons[0];
+const seasonName = season.id;
+
+/* Stories are addressed by slug so reordering or removing one cannot silently
+   point a link at a different story. Numeric links from before the content
+   layer still resolve. */
+const requested = query.get('story');
+const numeric = Number.parseInt(requested, 10);
+const bySlug = season.projects.findIndex(project => project.slug === requested);
+const storyIndex = bySlug >= 0
+  ? bySlug
+  : (Number.isInteger(numeric) && numeric >= 0 && numeric < season.projects.length ? numeric : 0);
 const story = season.projects[storyIndex];
 
 document.body.dataset.season = seasonName;
 
 document.title = `${story.title} — Else Away by Yaren`;
-const canonicalUrl = `https://elseaway.com/story.html?season=${seasonName}&story=${storyIndex}`;
-const shareImageUrl = `https://elseaway.com/assets/stories/${seasonName}-${storyIndex + 1}.webp`;
+const canonicalUrl = `https://elseaway.com/story.html?season=${seasonName}&story=${story.slug}`;
+const shareImageUrl = `https://elseaway.com/${story.image}`;
 document.querySelector('[data-story-canonical]').href = canonicalUrl;
 document.querySelector('[data-story-og-title]').content = document.title;
 document.querySelector('[data-story-og-description]').content = story.deck;
@@ -30,23 +37,21 @@ document.querySelector('[data-story-type]').textContent = story.type;
 document.querySelector('[data-story-body]').textContent = story.story;
 
 const storyImage = document.querySelector('[data-story-image]');
-storyImage.src = `assets/stories/${seasonName}-${storyIndex + 1}.webp`;
+storyImage.src = story.image;
 storyImage.alt = `${story.title}, ${story.place}`;
 
 const mapLink = document.querySelector('[data-story-map]');
-mapLink.href = `https://www.google.com/maps/search/?api=1&query=${encodeURIComponent(story.map)}`;
+mapLink.href = `https://www.google.com/maps/search/?api=1&query=${encodeURIComponent(story.location)}`;
 
-const seasonNames = Object.keys(allStories);
-let nextSeasonIndex = seasonNames.indexOf(seasonName);
+let nextSeason = season;
 let nextStoryIndex = storyIndex + 1;
 if (nextStoryIndex >= season.projects.length) {
   nextStoryIndex = 0;
-  nextSeasonIndex = (nextSeasonIndex + 1) % seasonNames.length;
+  nextSeason = allSeasons[(allSeasons.indexOf(season) + 1) % allSeasons.length];
 }
-const nextSeasonName = seasonNames[nextSeasonIndex];
-const nextStory = allStories[nextSeasonName].projects[nextStoryIndex];
+const nextStory = nextSeason.projects[nextStoryIndex];
 const nextLink = document.querySelector('[data-next-story]');
-nextLink.href = `story.html?season=${nextSeasonName}&story=${nextStoryIndex}`;
+nextLink.href = `story.html?season=${nextSeason.id}&story=${nextStory.slug}`;
 document.querySelector('[data-next-title]').textContent = nextStory.title;
 
 const header = document.querySelector('.story-header');
