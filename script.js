@@ -30,7 +30,7 @@ function renderSeason(name, animate = true) {
       </div>
     </a>
   `).join('');
-  if (animate) {
+  if (animate && !window.matchMedia('(prefers-reduced-motion: reduce)').matches) {
     track.querySelectorAll('.project-card').forEach((card, index) => card.animate(
       [{ opacity: 0, transform: 'translateY(28px)' }, { opacity: 1, transform: 'none' }],
       { duration: 650, delay: index * 65, easing: 'cubic-bezier(.2,.65,.25,1)', fill: 'both' }
@@ -103,8 +103,38 @@ gallery.addEventListener('pointerup', () => {
   goTo(activeIndex);
 });
 
-const journalTrack = document.querySelector('[data-journal-track]');
+const reduceMotion = window.matchMedia('(prefers-reduced-motion: reduce)');
+
+/* Give every postcard a written back. The words come from the story it links
+   to, so the card and the story it opens never drift out of sync. */
 const journalSet = document.querySelector('[data-journal-set]');
+if (journalSet) {
+  journalSet.querySelectorAll('.journal-card').forEach(card => {
+    const link = card.querySelector('a');
+    if (!link) return;
+    const params = new URLSearchParams(link.getAttribute('href').split('?')[1] || '');
+    const story = seasons[params.get('season')]?.projects[Number(params.get('story'))];
+    if (!story) return;
+
+    const inner = document.createElement('div');
+    inner.className = 'journal-card-inner';
+    const front = document.createElement('div');
+    front.className = 'journal-front';
+    while (card.firstChild) front.appendChild(card.firstChild);
+
+    const back = document.createElement('div');
+    back.className = 'journal-back';
+    back.innerHTML = `
+      <div class="journal-postmark" aria-hidden="true">${story.place}<br>${story.type}</div>
+      <p class="journal-note">${story.deck}</p>
+      <a href="${link.getAttribute('href')}">Enter field note <span aria-hidden="true">→</span></a>
+    `;
+    inner.append(front, back);
+    card.appendChild(inner);
+  });
+}
+
+const journalTrack = document.querySelector('[data-journal-track]');
 if (journalTrack && journalSet) {
   const journalClone = journalSet.cloneNode(true);
   journalClone.removeAttribute('data-journal-set');
@@ -113,20 +143,70 @@ if (journalTrack && journalSet) {
   journalTrack.appendChild(journalClone);
 }
 
+/* Dust in the beam. Only in the dark sections, and never when motion is
+   reduced. */
+function seedMotes(section, quantity) {
+  if (!section || reduceMotion.matches) return;
+  const field = document.createElement('div');
+  field.className = 'motes';
+  field.setAttribute('aria-hidden', 'true');
+  for (let i = 0; i < quantity; i += 1) {
+    const mote = document.createElement('span');
+    mote.className = 'mote';
+    mote.style.cssText = `left:${Math.random() * 100}%;--mote-size:${(Math.random() * 2.6 + 1.4).toFixed(1)}px;--mote-duration:${(Math.random() * 18 + 20).toFixed(1)}s;--mote-delay:${(-Math.random() * 30).toFixed(1)}s;--mote-drift:${(Math.random() * 90 - 45).toFixed(0)}px;--mote-opacity:${(Math.random() * .3 + .18).toFixed(2)}`;
+    field.appendChild(mote);
+  }
+  section.prepend(field);
+}
+seedMotes(document.querySelector('.about'), 16);
+seedMotes(document.querySelector('.journal'), 20);
+
+/* Siblings inside a revealed group arrive one after another. */
 const observer = new IntersectionObserver(entries => {
   entries.forEach(entry => { if (entry.isIntersecting) entry.target.classList.add('visible'); });
 }, { threshold: .13 });
 document.querySelectorAll('.reveal').forEach(element => observer.observe(element));
+document.querySelectorAll('.wwm-grid, .services, .intro-details').forEach(group => {
+  [...group.children].forEach((child, index) => child.style.setProperty('--reveal-delay', `${index * 90}ms`));
+});
+
+/* Depth. Elements marked with data-parallax move against the scroll at their
+   own rate, which separates foreground from background without any of them
+   leaving their layout box. Transform only, one rAF loop for the whole page,
+   and nothing at all when motion is reduced. */
+const parallaxItems = reduceMotion.matches ? [] : [...document.querySelectorAll('[data-parallax]')].map(el => ({
+  el,
+  rate: Number(el.dataset.parallax) || .1
+}));
 
 const header = document.querySelector('[data-header]');
 const heroImage = document.querySelector('.hero-image');
+let ticking = false;
+
 function updateScrollEffects() {
   const y = window.scrollY;
   header.classList.toggle('scrolled', y > 40);
   document.documentElement.style.setProperty('--scroll-progress', `${Math.min(1, y / (document.documentElement.scrollHeight - innerHeight)) * 100}%`);
   if (heroImage && y < innerHeight * 1.2) heroImage.style.setProperty('--hero-shift', `${y * .12}px`);
+
+  const viewportMiddle = y + innerHeight / 2;
+  parallaxItems.forEach(item => {
+    const box = item.el.getBoundingClientRect();
+    if (box.bottom < -200 || box.top > innerHeight + 200) return;
+    const centre = y + box.top + box.height / 2;
+    item.el.style.setProperty('--parallax-shift', `${(viewportMiddle - centre) * item.rate}px`);
+  });
+  ticking = false;
 }
-window.addEventListener('scroll', updateScrollEffects, { passive: true });
+
+function requestScrollUpdate() {
+  if (!ticking) {
+    ticking = true;
+    requestAnimationFrame(updateScrollEffects);
+  }
+}
+window.addEventListener('scroll', requestScrollUpdate, { passive: true });
+window.addEventListener('resize', requestScrollUpdate, { passive: true });
 updateScrollEffects();
 
 const menuToggle = document.querySelector('[data-menu-toggle]');
