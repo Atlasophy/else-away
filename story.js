@@ -49,29 +49,6 @@ const nextLink = document.querySelector('[data-next-story]');
 nextLink.href = `story.html?season=${nextSeasonName}&story=${nextStoryIndex}`;
 document.querySelector('[data-next-title]').textContent = nextStory.title;
 
-const THEME_KEY = 'elseaway-theme';
-const themeToggle = document.querySelector('[data-theme-toggle]');
-const themeColorMeta = document.querySelector('meta[name="theme-color"]');
-
-function applyTheme(theme) {
-  document.documentElement.dataset.theme = theme;
-  if (themeColorMeta) themeColorMeta.content = theme === 'light' ? '#e9f2ef' : '#120c1c';
-  if (themeToggle) {
-    themeToggle.setAttribute('aria-label', theme === 'light' ? 'Switch to dark mode' : 'Switch to light mode');
-    themeToggle.setAttribute('aria-pressed', String(theme === 'light'));
-  }
-}
-
-applyTheme(document.documentElement.dataset.theme === 'light' ? 'light' : 'dark');
-
-if (themeToggle) {
-  themeToggle.addEventListener('click', () => {
-    const next = document.documentElement.dataset.theme === 'light' ? 'dark' : 'light';
-    applyTheme(next);
-    try { localStorage.setItem(THEME_KEY, next); } catch (error) { /* private mode: theme just won't persist */ }
-  });
-}
-
 const header = document.querySelector('.story-header');
 function updateStoryScroll() {
   const y = window.scrollY;

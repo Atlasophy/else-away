@@ -3,91 +3,66 @@
 <head>
   <meta charset="utf-8">
   <meta name="viewport" content="width=device-width, initial-scale=1">
-  <meta name="description" content="Else Away by Yaren — travel photography and visual storytelling. A visual diary of places worth discovering, staying in, and remembering.">
-  <meta name="theme-color" content="#120c1c">
+  <meta name="description" content="Else Away by Yaren — travel photography, films, and field notes for soulful stays and local businesses.">
+  <meta name="theme-color" content="#173b2e">
   <meta name="author" content="Yaren">
   <meta property="og:type" content="website">
   <meta property="og:site_name" content="Else Away">
   <meta property="og:title" content="Else Away by Yaren — Stories from elsewhere">
-  <meta property="og:description" content="Travel photography and visual storytelling. A visual diary of places worth discovering, staying in, and remembering.">
+  <meta property="og:description" content="Travel photography, films, and field notes for soulful stays and local businesses.">
   <meta property="og:url" content="https://elseaway.com/">
-  <meta property="og:image" content="https://elseaway.com/assets/hero-art.jpg">
-  <meta property="og:image:alt" content="A camera floating above amethyst crystals in violet light">
+  <meta property="og:image" content="https://elseaway.com/assets/atlasophy-hero.webp">
+  <meta property="og:image:alt" content="A travel photographer overlooking a sunlit Mediterranean landscape">
   <meta name="twitter:card" content="summary_large_image">
   <meta name="twitter:title" content="Else Away by Yaren — Stories from elsewhere">
-  <meta name="twitter:description" content="Travel photography and visual storytelling. A visual diary of places worth discovering, staying in, and remembering.">
-  <meta name="twitter:image" content="https://elseaway.com/assets/hero-art.jpg">
+  <meta name="twitter:description" content="Travel photography, films, and field notes for soulful stays and local businesses.">
+  <meta name="twitter:image" content="https://elseaway.com/assets/atlasophy-hero.webp">
   <link rel="canonical" href="https://elseaway.com/">
   <link rel="icon" href="assets/favicon.svg" type="image/svg+xml">
   <title>Else Away by Yaren — Stories from elsewhere</title>
-  <link rel="preconnect" href="https://fonts.googleapis.com">
-  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
-  <link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Cormorant+Garamond:ital,wght@0,400;0,500;1,400;1,500&display=swap">
   <link rel="stylesheet" href="styles.css">
-  <script>
-    // set the theme before first paint so there is no flash of the wrong mode
-    (function () {
-      var saved = null;
-      try { saved = localStorage.getItem('elseaway-theme'); } catch (error) { saved = null; }
-      var theme = saved || (window.matchMedia('(prefers-color-scheme: light)').matches ? 'light' : 'dark');
-      document.documentElement.dataset.theme = theme;
-    })();
-  </script>
   <script src="story-data.js" defer></script>
   <script src="script.js" defer></script>
 </head>
 <body class="home-page">
   <a class="skip-link" href="#main">Skip to content</a>
   <div class="page-wipe" aria-hidden="true"></div>
-  <div class="page-vignette" aria-hidden="true"></div>
   <div class="scroll-progress" aria-hidden="true"></div>
 
   <header class="site-header" data-header>
     <a class="wordmark" href="#top" aria-label="Else Away home">
-      <span>elseaway</span><i>°</i>
+      <span>Else Away</span><i>°</i>
     </a>
     <nav class="desktop-nav" aria-label="Primary navigation">
-      <a href="#about">About me</a>
-      <a href="#work-with-me">Work with me</a>
+      <a href="#work">Selected work</a>
+      <a href="#about">About</a>
+      <a href="#journal">Journal</a>
     </nav>
-    <button class="theme-toggle" type="button" data-theme-toggle aria-label="Switch to light mode">
-      <i class="is-sun" aria-hidden="true">☀</i><i class="is-moon" aria-hidden="true">☾</i>
-    </button>
+    <a class="header-cta" href="mailto:yarenkecici022@gmail.com">Start a story <span aria-hidden="true">↗</span></a>
     <button class="menu-toggle" type="button" aria-label="Open menu" aria-expanded="false" data-menu-toggle>
       <span></span><span></span>
     </button>
   </header>
   <nav class="mobile-menu" aria-label="Mobile navigation" data-mobile-menu>
-    <a href="#about">About me</a>
-    <a href="#work-with-me">Work with me</a>
-    <a href="#work">A year in stories</a>
-    <a href="#journal">Postcards</a>
-    <a href="#contact">Start a story</a>
+    <a href="#work">Selected work</a>
+    <a href="#about">About Yaren</a>
+    <a href="#journal">Journal</a>
+    <a href="mailto:yarenkecici022@gmail.com">Start a story</a>
   </nav>
 
   <main id="main">
     <section class="hero" id="top" aria-labelledby="hero-title">
-      <div class="hero-ambient" aria-hidden="true"></div>
-      <div class="hero-stage" data-hero-stage>
-        <div class="hero-media">
-          <div class="hero-parallax" data-hero-parallax>
-            <img class="hero-art hero-art--dark" src="assets/hero-art.jpg" alt="A camera floating above glowing amethyst crystals" width="1672" height="941">
-            <img class="hero-art hero-art--light" src="assets/hero-art-light.jpg" alt="" aria-hidden="true" width="1672" height="941">
-            <div class="hero-glow" aria-hidden="true"></div>
-            <div class="hero-sparks" data-hero-sparks aria-hidden="true"></div>
-          </div>
-          <div class="hero-video-vignette" aria-hidden="true"></div>
-        </div>
-      </div>
+      <div class="hero-image" role="img" aria-label="A travel photographer looking over a sunlit Mediterranean landscape"></div>
+      <div class="hero-shade"></div>
       <div class="hero-content reveal">
         <p class="eyebrow light">Else Away · A visual journal by Yaren</p>
-        <h1 id="hero-title">Stories from <em>elsewhere.</em></h1>
-        <p class="hero-copy">Photographs and visual stories that make a place<br class="desktop-only"> feel like somewhere you’ve already missed.</p>
+        <h1 id="hero-title">Stories from<br><em>elsewhere.</em></h1>
+        <p class="hero-copy">Photographs and films that make a place<br class="desktop-only"> feel like somewhere you’ve already missed.</p>
       </div>
       <a class="hero-scroll" href="#intro" aria-label="Scroll to discover">
         <span>Scroll to discover</span><i aria-hidden="true">↓</i>
       </a>
-      <p class="hero-place">Based in Istanbul<br>Available worldwide</p>
+      <p class="hero-place">Based everywhere<br>Available worldwide</p>
     </section>
 
     <section class="intro section-pad" id="intro">
@@ -95,13 +70,12 @@
       <div class="intro-body reveal">
         <p class="display-copy">I follow the feeling of a place—<br>the light, the people, the little rituals.</p>
         <div class="intro-details">
-          <p>Else Away is a visual diary of places worth discovering, staying in, and remembering.</p>
-          <p class="intro-based">Currently based in Istanbul, available worldwide.</p>
+          <p>Else Away is Yaren’s visual diary and creative studio for soulful stays, independent businesses, and people who care about the story behind what they make.</p>
           <a class="text-link" href="#about">Meet the storyteller <span>↗</span></a>
         </div>
       </div>
       <div class="services reveal">
-        <span>Travel photography</span><span>Visual storytelling</span><span>Social stories</span><span>Travel notes</span>
+        <span>Photography</span><span>Short films</span><span>Social stories</span><span>Travel notes</span>
       </div>
     </section>
 
@@ -116,57 +90,10 @@
       </div>
     </div>
 
-    <section class="about section-pad" id="about" aria-labelledby="about-title">
-      <div class="about-collage reveal">
-        <figure class="polaroid">
-          <img src="assets/mirror.jpeg" alt="Yaren smiling in a mirror, holding her camera">
-          <figcaption>the eye behind it all °</figcaption>
-        </figure>
-      </div>
-      <div class="about-copy reveal">
-        <p class="eyebrow">02 <span></span> About me</p>
-        <h2 id="about-title">Hi, I’m <em>Yaren.</em><br>The eye behind it all.</h2>
-        <p>I’m a photographer, visual storyteller, and incurable wanderer. I created Else Away to document the places that make us slow down — quiet corners, sunlit rooms, unfamiliar streets, and the little moments that stay with us.</p>
-        <p>What began as a love for travelling and photography has grown into a journey of discovering places, staying in them, and telling their stories through my own eyes.</p>
-        <p>My work is unhurried, observant, and rooted in real life. I’m less interested in simply showing where I’ve been, and more interested in capturing how it felt to be there.</p>
-        <p class="about-motto">Less posing. More presence.</p>
-        <div class="signature" aria-label="Yaren signature">Yaren<span></span></div>
-        <a class="button-outline" href="#work-with-me">Work with me <span>↗</span></a>
-      </div>
-    </section>
-
-    <section class="work-with-me section-pad" id="work-with-me" aria-labelledby="wwm-title">
-      <div class="wwm-inner">
-        <p class="eyebrow light reveal">03 <span></span> Work with me</p>
-        <h2 id="wwm-title" class="reveal">Visual content for places<br>worth <em>staying in.</em></h2>
-        <p class="wwm-lead reveal">I create photography and visual content for villas, apartments, boutique stays, and distinctive properties—capturing not just how a place looks, but how it feels. Every collaboration is tailored to reflect the unique atmosphere and story of each space.</p>
-        <p class="wwm-what reveal">What I create</p>
-        <div class="wwm-grid reveal">
-          <article>
-            <h3>Photography</h3>
-            <p>Interior, exterior, architectural, detail, and lifestyle imagery.</p>
-          </article>
-          <article>
-            <h3>Reels &amp; Short-form Video</h3>
-            <p>Vertical videos designed for Instagram, TikTok, websites, and digital platforms.</p>
-          </article>
-          <article>
-            <h3>Social Media Content</h3>
-            <p>A curated collection of ready-to-use photos and videos for your social channels.</p>
-          </article>
-          <article>
-            <h3>Website &amp; Booking Platform Visuals</h3>
-            <p>Professional imagery for Airbnb, Booking.com, your website, and marketing materials.</p>
-          </article>
-        </div>
-        <a class="button-light reveal" href="#contact">Start a story <span>↗</span></a>
-      </div>
-    </section>
-
     <section class="portfolio" id="work" data-season="spring" aria-labelledby="work-title">
       <div class="portfolio-heading section-pad">
         <div class="section-meta reveal">
-          <p>04 <span></span> Selected work</p>
+          <p>02 <span></span> Selected work</p>
           <p class="project-count"><b data-current-count>01</b> / 05</p>
         </div>
         <div class="work-title-row reveal">
@@ -195,15 +122,31 @@
       </div>
     </section>
 
+    <section class="about section-pad" id="about" aria-labelledby="about-title">
+      <div class="about-collage reveal" aria-hidden="true">
+        <div class="photo-frame frame-one"><span></span></div>
+        <div class="photo-frame frame-two"><span></span></div>
+        <p>Collecting moments<br>since forever.</p>
+      </div>
+      <div class="about-copy reveal">
+        <p class="eyebrow">03 <span></span> Behind the lens</p>
+        <h2 id="about-title">Hi, I’m <em>Yaren.</em><br>The eye behind it all.</h2>
+        <p>I’m a photographer, filmmaker, and incurable wanderer. I started Else Away to document the places that make us slow down—and to help thoughtful hosts and local makers share what makes their corner of the world special.</p>
+        <p>My work is unhurried, observant, and rooted in real life. Less posing. More presence.</p>
+        <div class="signature" aria-label="Yaren signature">Yaren<span></span></div>
+        <a class="button-outline" href="mailto:yarenkecici022@gmail.com">Work with me <span>↗</span></a>
+      </div>
+    </section>
+
     <section class="journal" id="journal" aria-labelledby="journal-title">
       <div class="journal-heading section-pad">
         <div class="section-meta reveal">
-          <p>05 <span></span> From the road</p>
+          <p>04 <span></span> Field notes</p>
           <p class="journal-drift-note">Stories in motion <span>←</span></p>
         </div>
         <div class="journal-title-row reveal">
-          <h2 id="journal-title">Postcards from <em>elsewhere.</em></h2>
-          <p>A growing collection of places I’ve wandered through,<br>stayed in, and wanted to remember.</p>
+          <h2 id="journal-title">Notes from <em>elsewhere.</em></h2>
+          <p>Small rituals, unlikely rooms, and journeys<br>that rarely make the guidebooks.</p>
         </div>
       </div>
       <div class="journal-rail" id="journal-grid">
@@ -255,13 +198,12 @@
         <p class="eyebrow light">Have a place worth remembering?</p>
         <h2 id="contact-title">Let’s tell its<br><em>story.</em></h2>
         <p>Available for stays, local businesses, tourism projects,<br class="desktop-only"> and beautifully unplanned adventures worldwide.</p>
-        <a class="button-light" href="mailto:yarenkecici022@gmail.com?subject=A%20place%20worth%20remembering">yarenkecici022@gmail.com <span>↗</span></a>
-        <p class="closing-line">I don’t just photograph places. I photograph the feeling<br class="desktop-only"> that makes you want to stay a little longer.</p>
+        <a class="button-light" href="mailto:yarenkecici022@gmail.com">yarenkecici022@gmail.com <span>↗</span></a>
       </div>
       <footer>
-        <a class="wordmark" href="#top"><span>elseaway</span><i>°</i></a>
+        <a class="wordmark" href="#top"><span>Else Away</span><i>°</i></a>
         <p>By Atlasophy</p>
-        <div><a href="https://www.instagram.com/saucerfulsecrets/" target="_blank" rel="noreferrer">Instagram</a><a href="mailto:yarenkecici022@gmail.com">Email</a><a href="#journal">Postcards</a></div>
+        <div><a href="https://www.instagram.com/saucerfulsecrets/" target="_blank" rel="noreferrer">Instagram</a><a href="mailto:yarenkecici022@gmail.com">Email</a><a href="#journal">Journal</a></div>
         <p>© <span data-year></span> Else Away</p>
       </footer>
     </section>
@@ -272,7 +214,7 @@
       "@type": "Person",
       "name": "Yaren",
       "url": "https://elseaway.com/",
-      "jobTitle": "Travel photographer and visual storyteller",
+      "jobTitle": "Photographer and filmmaker",
       "sameAs": ["https://www.instagram.com/saucerfulsecrets/"],
       "brand": { "@type": "Brand", "name": "Else Away" }
     }
