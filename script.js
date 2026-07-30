@@ -22,6 +22,7 @@ function renderSeason(name, animate = true) {
   track.innerHTML = data.projects.map((project, index) => `
     <a class="project-card" data-project-index="${index}" href="story.html?season=${name}&story=${index}" aria-label="Open story: ${project.title}, ${project.place}">
       <img class="project-image" src="assets/stories/${name}-${index + 1}.webp" alt="" loading="lazy">
+      <span class="frame-mark" aria-hidden="true">${String(index + 1).padStart(2, '0')}</span>
       <div class="project-info">
         <p>${project.type} · ${project.place}</p>
         <h3>${project.title}</h3>

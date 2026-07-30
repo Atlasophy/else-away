@@ -9,6 +9,7 @@
   --season-bg: #dbe1c7;
   --serif: Iowan Old Style, Baskerville, "Times New Roman", serif;
   --sans: Inter, "Helvetica Neue", Arial, sans-serif;
+  --mono: ui-monospace, "SF Mono", SFMono-Regular, Menlo, Consolas, monospace;
 }
 
 * { box-sizing: border-box; }
@@ -53,7 +54,8 @@ h1 em, h2 em { font-weight: 400; }
 
 .section-pad { padding: 120px 8.5vw; }
 .intro { background: var(--paper); }
-.intro-index, .section-meta, .eyebrow { font-size: 10px; font-weight: 600; letter-spacing: .17em; text-transform: uppercase; }
+/* Metadata reads as typewritten archive labelling, against the display serif. */
+.intro-index, .section-meta, .eyebrow { font-family: var(--mono); font-size: 10px; font-weight: 500; letter-spacing: .17em; text-transform: uppercase; }
 .intro-index { display: flex; align-items: center; gap: 15px; }
 .intro-index span, .section-meta p:first-child span, .about .eyebrow span { display: inline-block; width: 46px; height: 1px; background: currentColor; opacity: .4; vertical-align: middle; margin: 0 10px; }
 .intro-body { display: grid; grid-template-columns: minmax(0, 1.8fr) minmax(260px, .7fr); gap: 8vw; align-items: end; margin-top: 85px; }
@@ -74,10 +76,12 @@ h1 em, h2 em { font-weight: 400; }
 .marquee span { padding: 0 34px; font: italic 27px var(--serif); white-space: nowrap; }
 .marquee i { color: #d8aa70; font-size: 12px; font-style: normal; }
 
-.portfolio { --accent: #758b5a; --season-bg: #d9dfc5; background: var(--season-bg); transition: background .7s ease; overflow: hidden; }
-.portfolio[data-season="summer"] { --accent: #b6603d; --season-bg: #e9d8bc; }
-.portfolio[data-season="autumn"] { --accent: #984729; --season-bg: #d9b99d; }
-.portfolio[data-season="winter"] { --accent: #52707a; --season-bg: #d5dde0; }
+/* Each season is graded as a film stock: the palette, the stock name in the
+   controls, and the grade applied to the photographs all shift together. */
+.portfolio { --accent: #5b6745; --season-bg: #dfe0cd; --film: "Portra 400"; --film-grade: saturate(.94) contrast(.97) sepia(.06); background: var(--season-bg); transition: background .7s ease; overflow: hidden; }
+.portfolio[data-season="summer"] { --accent: #2c6777; --season-bg: #cfdde2; --film: "Ektachrome E100"; --film-grade: saturate(1.14) contrast(1.07); }
+.portfolio[data-season="autumn"] { --accent: #824a1b; --season-bg: #e3cba2; --film: "Kodak Gold 200"; --film-grade: saturate(1.06) contrast(1.01) sepia(.18); }
+.portfolio[data-season="winter"] { --accent: #4b5b62; --season-bg: #d7dadb; --film: "Ilford HP5"; --film-grade: saturate(.4) contrast(1.1); }
 .portfolio-heading { padding-bottom: 66px; }
 .section-meta { display: flex; align-items: center; justify-content: space-between; }
 .section-meta p { margin: 0; }
@@ -93,22 +97,26 @@ h1 em, h2 em { font-weight: 400; }
 .season-tabs button[aria-selected="true"]::after { transform: scaleX(1); }
 .season-tabs i { padding-top: 6px; font: 9px var(--sans); }
 .gallery-shell { padding-bottom: 90px; }
-.gallery-viewport { overflow-x: auto; scrollbar-width: none; cursor: grab; scroll-snap-type: x mandatory; scroll-behavior: smooth; outline-offset: -3px; }
+/* Sprocket perforations use background-attachment:local so they travel with
+   the frames as the strip is dragged, rather than sitting over a fixed edge. */
+.gallery-viewport { overflow-x: auto; scrollbar-width: none; cursor: grab; scroll-snap-type: x mandatory; scroll-behavior: smooth; outline-offset: -3px; padding-block: 17px; background-image: repeating-linear-gradient(90deg, rgba(24,32,25,.20) 0 9px, transparent 9px 24px), repeating-linear-gradient(90deg, rgba(24,32,25,.20) 0 9px, transparent 9px 24px); background-size: 24px 5px; background-position: 12px 6px, 12px calc(100% - 6px); background-repeat: repeat-x; background-attachment: local; }
 .gallery-viewport::-webkit-scrollbar { display: none; }
 .gallery-viewport.dragging { cursor: grabbing; scroll-snap-type: none; scroll-behavior: auto; user-select: none; }
 .gallery-track { display: flex; width: max-content; gap: 18px; padding: 0 8.5vw; }
 .project-card { position: relative; display: block; flex: 0 0 clamp(245px, 26vw, 420px); aspect-ratio: .76; overflow: hidden; scroll-snap-align: start; background: #9ca394; outline-offset: 5px; }
-.project-image { position: absolute; inset: 0; width: 100%; height: 100%; object-fit: cover; transition: scale .8s cubic-bezier(.2,.65,.25,1), filter .4s; }
+.project-image { position: absolute; inset: 0; width: 100%; height: 100%; object-fit: cover; filter: var(--film-grade); transition: scale .8s cubic-bezier(.2,.65,.25,1), filter .7s ease; }
 .project-card::after { content: ""; position: absolute; inset: 32% 0 0; background: linear-gradient(transparent, rgba(10,12,9,.76)); transition: opacity .35s; }
-.project-card:hover .project-image, .project-card:focus-visible .project-image { scale: 1.055; filter: saturate(.9) contrast(1.04); }
+.project-card:hover .project-image, .project-card:focus-visible .project-image { scale: 1.055; }
+.frame-mark { position: absolute; z-index: 2; top: 16px; left: 18px; color: rgba(255,255,255,.72); font: 500 10px/1 var(--mono); letter-spacing: .12em; text-shadow: 0 1px 5px rgba(10,12,9,.55); }
 .project-info { position: absolute; z-index: 2; right: 25px; bottom: 23px; left: 25px; color: white; }
-.project-info p { margin: 0 0 8px; font-size: 9px; letter-spacing: .15em; text-transform: uppercase; }
+.project-info p { margin: 0 0 8px; font-family: var(--mono); font-size: 9px; letter-spacing: .15em; text-transform: uppercase; }
 .project-info h3 { margin: 0; font: 31px/1.05 var(--serif); transition: transform .35s cubic-bezier(.2,.65,.25,1); }
 .project-open { display: flex; justify-content: space-between; align-items: center; height: 0; overflow: hidden; opacity: 0; font-size: 9px; font-weight: 600; letter-spacing: .15em; text-transform: uppercase; transition: height .35s, opacity .35s, margin .35s; }
 .project-open i { display: grid; place-items: center; width: 30px; height: 30px; border: 1px solid rgba(255,255,255,.65); border-radius: 50%; font-style: normal; }
 .project-card:hover .project-open, .project-card:focus-visible .project-open { height: 30px; margin-top: 16px; opacity: 1; }
 .gallery-controls { display: flex; justify-content: space-between; align-items: center; padding: 25px 8.5vw 0; }
-.gallery-controls > p { margin: 0; font: italic 17px var(--serif); }
+.gallery-controls > p { display: flex; flex-direction: column; gap: 8px; margin: 0; font: italic 17px var(--serif); }
+.gallery-controls > p::before { content: var(--film); color: var(--accent); font: 500 9px/1 var(--mono); letter-spacing: .2em; text-transform: uppercase; transition: color .5s ease; }
 .gallery-controls div { display: flex; gap: 9px; }
 .gallery-controls button { width: 45px; height: 45px; border: 1px solid rgba(24,32,25,.55); border-radius: 50%; background: transparent; cursor: pointer; transition: color .2s, background .2s; }
 .gallery-controls button:hover { color: white; background: var(--ink); }
@@ -149,7 +157,7 @@ h1 em, h2 em { font-weight: 400; }
 .journal-card:nth-child(3n+2) { transform: translateY(12px); }
 .journal-image { aspect-ratio: 1.14; background: var(--journal-image) center / cover no-repeat; box-shadow: 0 24px 55px rgba(0,0,0,.28); transition: transform .6s cubic-bezier(.2,.65,.25,1), filter .4s; }
 .journal-card:hover .journal-image { transform: translateY(-5px) scale(1.015); filter: brightness(1.05); }
-.post-meta { margin: 17px 0 10px; color: #b6c2ad; font-size: 8px; letter-spacing: .17em; text-transform: uppercase; }
+.post-meta { margin: 17px 0 10px; color: #b6c2ad; font-family: var(--mono); font-size: 8px; letter-spacing: .17em; text-transform: uppercase; }
 .journal-card h3 { max-width: 315px; min-height: 50px; margin: 0 0 18px; color: var(--cream); font: 22px/1.12 var(--serif); }
 .journal-card > a { display: inline-flex; gap: 25px; padding-bottom: 5px; border-bottom: 1px solid rgba(241,234,220,.55); color: rgba(241,234,220,.82); font-size: 8px; font-weight: 600; letter-spacing: .15em; text-transform: uppercase; }
 
