@@ -1,0 +1,48 @@
+<!doctype html>
+<html lang="en">
+<head>
+  <meta charset="utf-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1">
+  <meta name="robots" content="noindex, nofollow">
+  <title>Else Away — Studio</title>
+  <link rel="icon" href="../assets/favicon.svg" type="image/svg+xml">
+  <link rel="stylesheet" href="admin.css">
+  <script src="admin.js" type="module" defer></script>
+</head>
+<body>
+  <a class="skip-link" href="#workspace">Skip to the editor</a>
+
+  <header class="bar">
+    <span class="wordmark">Else Away<i>°</i></span>
+    <nav class="tabs" aria-label="Sections">
+      <button type="button" class="tab" data-view="stories" aria-current="true">Stories</button>
+      <button type="button" class="tab" data-view="postcards">Postcards</button>
+      <button type="button" class="tab" data-view="photos">Photographs</button>
+      <button type="button" class="tab" data-view="details">Details</button>
+    </nav>
+    <div class="bar-actions">
+      <p class="status" role="status" data-status></p>
+      <button type="button" class="publish" data-publish disabled>Publish</button>
+    </div>
+  </header>
+
+  <main id="workspace" class="workspace" data-workspace>
+    <p class="loading">Opening your studio…</p>
+  </main>
+
+  <div class="dialog-backdrop" data-picker hidden>
+    <div class="dialog" role="dialog" aria-modal="true" aria-labelledby="picker-title">
+      <div class="dialog-head">
+        <h2 id="picker-title">Choose a photograph</h2>
+        <button type="button" class="ghost" data-picker-close>Close</button>
+      </div>
+      <label class="upload">
+        <input type="file" accept="image/*" multiple data-upload-input>
+        <span>Upload from your computer</span>
+        <small>Large photographs are resized before they are sent, so this works on any connection.</small>
+      </label>
+      <div class="picker-grid" data-picker-grid></div>
+    </div>
+  </div>
+</body>
+</html>

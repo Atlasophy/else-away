@@ -1,0 +1,23 @@
+name = "else-away"
+pages_build_output_dir = "."
+compatibility_date = "2025-01-01"
+
+# Content lives in D1; photographs live in R2. R2 is the reason this stack was
+# chosen: it charges nothing for bandwidth, and a photography portfolio is
+# almost entirely bandwidth.
+
+[[d1_databases]]
+binding = "DB"
+database_name = "else-away"
+database_id = "REPLACE_WITH_DATABASE_ID"
+
+[[r2_buckets]]
+binding = "MEDIA"
+bucket_name = "else-away-media"
+
+[vars]
+# Both are needed to verify the Cloudflare Access token on admin requests.
+# ACCESS_TEAM_DOMAIN looks like "yaren.cloudflareaccess.com".
+# ACCESS_AUD is the Application Audience tag from the Access application.
+ACCESS_TEAM_DOMAIN = "REPLACE_WITH_TEAM_DOMAIN"
+ACCESS_AUD = "REPLACE_WITH_APPLICATION_AUDIENCE_TAG"

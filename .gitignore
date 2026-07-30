@@ -19,3 +19,7 @@ assets/hero-art.png
 assets/hero-still.jpg
 assets/hero-still-alt.jpg
 assets/hero-poster.jpg
+
+# Cloudflare
+.wrangler/
+.dev.vars
