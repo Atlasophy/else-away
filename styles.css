@@ -43,7 +43,7 @@ button { color: inherit; font: inherit; }
 .hero-content { position: absolute; z-index: 2; left: 8.5vw; top: 43%; transform: translateY(-45%); }
 .eyebrow { margin: 0 0 26px; font-size: 10px; font-weight: 600; letter-spacing: .2em; text-transform: uppercase; }
 .eyebrow.light { color: rgba(255,255,255,.78); }
-.hero h1, .work-title-row h2, .about h2, .journal h2, .contact h2 { margin: 0; font: 400 clamp(66px, 9.3vw, 150px)/.8 var(--serif); letter-spacing: -.06em; }
+.hero h1, .work-title-row h2, .about h2, .wwm-inner h2, .journal h2, .contact h2 { margin: 0; font: 400 clamp(66px, 9.3vw, 150px)/.8 var(--serif); letter-spacing: -.06em; }
 h1 em, h2 em { font-weight: 400; }
 .hero h1 em { margin-left: .55em; }
 .hero-copy { margin: 35px 0 0 10px; color: rgba(255,255,255,.86); font: 16px/1.55 var(--serif); }
@@ -75,6 +75,21 @@ h1 em, h2 em { font-weight: 400; }
 .marquee-group { display: flex; flex: none; align-items: center; padding: 20px 0 22px; }
 .marquee span { padding: 0 34px; font: italic 27px var(--serif); white-space: nowrap; }
 .marquee i { color: #d8aa70; font-size: 12px; font-style: normal; }
+
+/* Work with me sits on Yaren's own sea photograph. It is graded warm so the
+   image belongs to the vintage palette instead of reading as a pasted-in
+   photo, with a tinted scrim underneath for text contrast. */
+.work-with-me { position: relative; isolation: isolate; color: var(--cream); background: var(--coffee); overflow: hidden; }
+.work-with-me::before { content: ""; position: absolute; inset: 0; z-index: -2; background: url("assets/sea.jpeg") center 45% / cover no-repeat; filter: saturate(.82) contrast(1.02) sepia(.3) brightness(.86); }
+.work-with-me::after { content: ""; position: absolute; inset: 0; z-index: -1; background: linear-gradient(180deg, rgba(40,25,16,.76) 0%, rgba(40,25,16,.68) 42%, rgba(40,25,16,.82) 100%); }
+.wwm-inner { max-width: 1060px; }
+.wwm-inner h2 { margin: 0 0 32px; font-size: clamp(40px, 4.8vw, 74px); }
+.wwm-lead { max-width: 620px; margin: 0; color: rgba(241,234,220,.96); font: 17px/1.65 var(--serif); }
+.wwm-what { margin: 62px 0 24px; color: #f0d3a2; font-family: var(--mono); font-size: 10px; font-weight: 500; letter-spacing: .17em; text-transform: uppercase; }
+.wwm-grid { display: grid; grid-template-columns: repeat(2, minmax(0, 1fr)); gap: 34px 60px; max-width: 880px; }
+.wwm-grid article { padding-top: 19px; border-top: 1px solid rgba(241,234,220,.3); }
+.wwm-grid h3 { margin: 0 0 9px; font: 22px/1.25 var(--serif); }
+.wwm-grid p { margin: 0; color: rgba(241,234,220,.92); font: 15px/1.6 var(--serif); }
 
 /* Each season is graded as a film stock: the palette, the stock name in the
    controls, and the grade applied to the photographs all shift together. */
@@ -125,10 +140,10 @@ h1 em, h2 em { font-weight: 400; }
 .about-collage { position: relative; height: 670px; }
 .photo-frame { position: absolute; overflow: hidden; box-shadow: 0 30px 70px rgba(0,0,0,.24); }
 .photo-frame span { display: block; width: 100%; height: 100%; background-position: center; background-size: cover; }
-.frame-one { top: 0; left: 4%; width: 59%; height: 74%; transform: rotate(-3.5deg); }
-.frame-one span { background-image: url("assets/stories/summer-1.webp"); }
-.frame-two { right: 1%; bottom: 0; width: 53%; height: 66%; transform: rotate(4deg); border: 8px solid #e8ddcb; }
-.frame-two span { background-image: url("assets/stories/autumn-4.webp"); }
+/* A single print, tilted as if set down on a table, with the cream border of
+   a physical photograph. */
+.frame-one { top: 0; left: 50%; width: min(66%, 420px); height: 100%; border: 9px solid #e8ddcb; transform: translateX(-48%) rotate(-3deg); }
+.photo-frame img { display: block; width: 100%; height: 100%; object-fit: cover; }
 .about-collage > p { position: absolute; z-index: 3; bottom: 8%; left: 1%; margin: 0; transform: rotate(-7deg); color: #e5bd83; font: italic 20px/1.2 var(--serif); }
 .about .eyebrow { color: #b7bd9e; }
 .about h2 { margin-bottom: 45px; font-size: clamp(50px, 6vw, 86px); }
@@ -179,6 +194,8 @@ footer div { display: flex; gap: 25px; font-size: 9px; letter-spacing: .12em; te
 @keyframes journalDrift { to { transform: translate3d(calc(-50% - 11px),0,0); } }
 
 @media (max-width: 900px) {
+  .wwm-grid { grid-template-columns: 1fr; gap: 28px; }
+  .wwm-what { margin-top: 46px; }
   .site-header { height: 76px; grid-template-columns: 1fr auto; padding: 0 22px; }
   .site-header > .wordmark { position: relative; z-index: 2; }
   .site-header.menu-open { color: var(--cream); background: transparent; border-color: transparent; backdrop-filter: none; }
@@ -232,8 +249,7 @@ footer div { display: flex; gap: 25px; font-size: 9px; letter-spacing: .12em; te
   .project-open { height: 30px; margin-top: 12px; opacity: 1; }
   .about-collage { height: 430px; }
   .about h2 { font-size: 52px; }
-  .frame-one { width: 65%; }
-  .frame-two { width: 58%; }
+  .frame-one { width: min(72%, 300px); }
   .journal-title-row h2 { font-size: 54px; }
   .journal-title-row p br { display: none; }
   .journal-card { flex-basis: 74vw; }
