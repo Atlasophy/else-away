@@ -3,56 +3,46 @@
 <head>
   <meta charset="utf-8">
   <meta name="viewport" content="width=device-width, initial-scale=1">
-  <meta name="description" content="Else Away by Yaren — travel photography and visual storytelling. A visual diary of places worth discovering, staying in, and remembering.">
-  <meta name="theme-color" content="#120c1c">
+  <meta name="description" content="Else Away by Yaren — travel photography and visual storytelling for villas, boutique stays, and distinctive properties. Based in Istanbul, available worldwide.">
+  <meta name="theme-color" content="#173b2e">
   <meta name="author" content="Yaren">
   <meta property="og:type" content="website">
   <meta property="og:site_name" content="Else Away">
   <meta property="og:title" content="Else Away by Yaren — Stories from elsewhere">
-  <meta property="og:description" content="Travel photography and visual storytelling. A visual diary of places worth discovering, staying in, and remembering.">
+  <meta property="og:description" content="Travel photography and visual storytelling for villas, boutique stays, and distinctive properties.">
   <meta property="og:url" content="https://elseaway.com/">
-  <meta property="og:image" content="https://elseaway.com/assets/hero-art.jpg">
-  <meta property="og:image:alt" content="A camera floating above amethyst crystals in violet light">
+  <meta property="og:image" content="https://elseaway.com/assets/sea.jpeg">
+  <meta property="og:image:width" content="1600">
+  <meta property="og:image:height" content="1200">
+  <meta property="og:image:alt" content="Yaren photographing the sea at golden hour">
   <meta name="twitter:card" content="summary_large_image">
   <meta name="twitter:title" content="Else Away by Yaren — Stories from elsewhere">
-  <meta name="twitter:description" content="Travel photography and visual storytelling. A visual diary of places worth discovering, staying in, and remembering.">
-  <meta name="twitter:image" content="https://elseaway.com/assets/hero-art.jpg">
+  <meta name="twitter:description" content="Travel photography and visual storytelling for villas, boutique stays, and distinctive properties.">
+  <meta name="twitter:image" content="https://elseaway.com/assets/sea.jpeg">
   <link rel="canonical" href="https://elseaway.com/">
   <link rel="icon" href="assets/favicon.svg" type="image/svg+xml">
   <title>Else Away by Yaren — Stories from elsewhere</title>
-  <link rel="preconnect" href="https://fonts.googleapis.com">
-  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
-  <link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Cormorant+Garamond:ital,wght@0,400;0,500;1,400;1,500&display=swap">
   <link rel="stylesheet" href="styles.css">
-  <script>
-    // set the theme before first paint so there is no flash of the wrong mode
-    (function () {
-      var saved = null;
-      try { saved = localStorage.getItem('elseaway-theme'); } catch (error) { saved = null; }
-      var theme = saved || (window.matchMedia('(prefers-color-scheme: light)').matches ? 'light' : 'dark');
-      document.documentElement.dataset.theme = theme;
-    })();
-  </script>
-  <script src="story-data.js" defer></script>
+  <script src="/api/content-script" defer></script>
+  <script src="content.js" defer></script>
   <script src="script.js" defer></script>
 </head>
 <body class="home-page">
   <a class="skip-link" href="#main">Skip to content</a>
   <div class="page-wipe" aria-hidden="true"></div>
-  <div class="page-vignette" aria-hidden="true"></div>
   <div class="scroll-progress" aria-hidden="true"></div>
 
   <header class="site-header" data-header>
     <a class="wordmark" href="#top" aria-label="Else Away home">
-      <span>elseaway</span><i>°</i>
+      <span>Else Away</span><i>°</i>
     </a>
     <nav class="desktop-nav" aria-label="Primary navigation">
       <a href="#about">About me</a>
       <a href="#work-with-me">Work with me</a>
+      <a href="#work">Selected work</a>
+      <a href="#journal">Postcards</a>
     </nav>
-    <button class="theme-toggle" type="button" data-theme-toggle aria-label="Switch to light mode">
-      <i class="is-sun" aria-hidden="true">☀</i><i class="is-moon" aria-hidden="true">☾</i>
-    </button>
+    <a class="header-cta" href="mailto:yarenkecici022@gmail.com">Start a story <span aria-hidden="true">↗</span></a>
     <button class="menu-toggle" type="button" aria-label="Open menu" aria-expanded="false" data-menu-toggle>
       <span></span><span></span>
     </button>
@@ -67,21 +57,11 @@
 
   <main id="main">
     <section class="hero" id="top" aria-labelledby="hero-title">
-      <div class="hero-ambient" aria-hidden="true"></div>
-      <div class="hero-stage" data-hero-stage>
-        <div class="hero-media">
-          <div class="hero-parallax" data-hero-parallax>
-            <img class="hero-art hero-art--dark" src="assets/hero-art.jpg" alt="A camera floating above glowing amethyst crystals" width="1672" height="941">
-            <img class="hero-art hero-art--light" src="assets/hero-art-light.jpg" alt="" aria-hidden="true" width="1672" height="941">
-            <div class="hero-glow" aria-hidden="true"></div>
-            <div class="hero-sparks" data-hero-sparks aria-hidden="true"></div>
-          </div>
-          <div class="hero-video-vignette" aria-hidden="true"></div>
-        </div>
-      </div>
+      <div class="hero-image" role="img" aria-label="A travel photographer looking over a sunlit Mediterranean landscape"></div>
+      <div class="hero-shade"></div>
       <div class="hero-content reveal">
         <p class="eyebrow light">Else Away · A visual journal by Yaren</p>
-        <h1 id="hero-title">Stories from <em>elsewhere.</em></h1>
+        <h1 id="hero-title">Stories from<br><em>elsewhere.</em></h1>
         <p class="hero-copy">Photographs and visual stories that make a place<br class="desktop-only"> feel like somewhere you’ve already missed.</p>
       </div>
       <a class="hero-scroll" href="#intro" aria-label="Scroll to discover">
@@ -117,9 +97,9 @@
     </div>
 
     <section class="about section-pad" id="about" aria-labelledby="about-title">
-      <div class="about-collage reveal">
+      <div class="about-collage reveal" data-parallax="0.07">
         <figure class="polaroid">
-          <img src="assets/mirror.jpeg" alt="Yaren smiling in a mirror, holding her camera">
+          <img src="assets/mirror.jpeg" alt="Yaren smiling in a mirror, holding her camera" width="900" height="1600" loading="lazy">
           <figcaption>the eye behind it all °</figcaption>
         </figure>
       </div>
@@ -135,7 +115,7 @@
       </div>
     </section>
 
-    <section class="work-with-me section-pad" id="work-with-me" aria-labelledby="wwm-title">
+    <section class="work-with-me section-pad" id="work-with-me" aria-labelledby="wwm-title" data-parallax="0.14">
       <div class="wwm-inner">
         <p class="eyebrow light reveal">03 <span></span> Work with me</p>
         <h2 id="wwm-title" class="reveal">Visual content for places<br>worth <em>staying in.</em></h2>
@@ -159,7 +139,7 @@
             <p>Professional imagery for Airbnb, Booking.com, your website, and marketing materials.</p>
           </article>
         </div>
-        <a class="button-light reveal" href="#contact">Start a story <span>↗</span></a>
+        <a class="button-light reveal" href="mailto:yarenkecici022@gmail.com">Start a story <span>↗</span></a>
       </div>
     </section>
 
@@ -167,7 +147,7 @@
       <div class="portfolio-heading section-pad">
         <div class="section-meta reveal">
           <p>04 <span></span> Selected work</p>
-          <p class="project-count"><b data-current-count>01</b> / 05</p>
+          <p class="project-count"><b data-current-count>01</b> / <span data-total-count>05</span></p>
         </div>
         <div class="work-title-row reveal">
           <h2 id="work-title">A year in <em>stories.</em></h2>
@@ -208,45 +188,7 @@
       </div>
       <div class="journal-rail" id="journal-grid">
         <div class="journal-track" data-journal-track>
-          <div class="journal-set" data-journal-set>
-            <article class="journal-card">
-              <div class="journal-image" style="--journal-image:url('assets/stories/summer-5.webp')" aria-hidden="true"></div>
-              <p class="post-meta">Menorca · After midnight</p>
-              <h3>The table they set after everyone else had gone home</h3>
-              <a href="story.html?season=summer&story=4">Enter field note <span>→</span></a>
-            </article>
-            <article class="journal-card">
-              <div class="journal-image" style="--journal-image:url('assets/stories/autumn-5.webp')" aria-hidden="true"></div>
-              <p class="post-meta">Tatras · Night train</p>
-              <h3>Waking up at the last station before the mountains</h3>
-              <a href="story.html?season=autumn&story=4">Enter field note <span>→</span></a>
-            </article>
-            <article class="journal-card">
-              <div class="journal-image" style="--journal-image:url('assets/stories/autumn-4.webp')" aria-hidden="true"></div>
-              <p class="post-meta">Salzburg · 05:12</p>
-              <h3>Inside the bakery before the first tram passed</h3>
-              <a href="story.html?season=autumn&story=3">Enter field note <span>→</span></a>
-            </article>
-            <article class="journal-card">
-              <div class="journal-image" style="--journal-image:url('assets/stories/winter-3.webp')" aria-hidden="true"></div>
-              <p class="post-meta">Iceland · Below zero</p>
-              <h3>A winter bath where the road quietly disappears</h3>
-              <a href="story.html?season=winter&story=2">Enter field note <span>→</span></a>
-            </article>
-            <article class="journal-card">
-              <div class="journal-image" style="--journal-image:url('assets/stories/spring-3.webp')" aria-hidden="true"></div>
-              <p class="post-meta">Provence · Wild clay</p>
-              <h3>Learning why this village never paints its pottery</h3>
-              <a href="story.html?season=spring&story=2">Enter field note <span>→</span></a>
-            </article>
-            <article class="journal-card">
-              <div class="journal-image" style="--journal-image:url('assets/stories/spring-2.webp')" aria-hidden="true"></div>
-              <p class="post-meta">Austria · No road in</p>
-              <h3>Three days in the orchard cabin reached only on foot</h3>
-              <a href="story.html?season=spring&story=1">Enter field note <span>→</span></a>
-            </article>
-          </div>
-        </div>
+          <div class="journal-set" data-journal-set></div>
       </div>
     </section>
 
@@ -259,7 +201,7 @@
         <p class="closing-line">I don’t just photograph places. I photograph the feeling<br class="desktop-only"> that makes you want to stay a little longer.</p>
       </div>
       <footer>
-        <a class="wordmark" href="#top"><span>elseaway</span><i>°</i></a>
+        <a class="wordmark" href="#top"><span>Else Away</span><i>°</i></a>
         <p>By Atlasophy</p>
         <div><a href="https://www.instagram.com/saucerfulsecrets/" target="_blank" rel="noreferrer">Instagram</a><a href="mailto:yarenkecici022@gmail.com">Email</a><a href="#journal">Postcards</a></div>
         <p>© <span data-year></span> Else Away</p>
@@ -272,7 +214,7 @@
       "@type": "Person",
       "name": "Yaren",
       "url": "https://elseaway.com/",
-      "jobTitle": "Travel photographer and visual storyteller",
+      "jobTitle": "Photographer and filmmaker",
       "sameAs": ["https://www.instagram.com/saucerfulsecrets/"],
       "brand": { "@type": "Brand", "name": "Else Away" }
     }

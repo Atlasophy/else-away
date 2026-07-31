@@ -3,7 +3,7 @@
 <head>
   <meta charset="utf-8">
   <meta name="viewport" content="width=device-width, initial-scale=1">
-  <meta name="theme-color" content="#120c1c">
+  <meta name="theme-color" content="#173b2e">
   <meta name="description" content="A visual field note by Yaren for Else Away.">
   <meta name="author" content="Yaren">
   <meta property="og:type" content="article">
@@ -11,29 +11,18 @@
   <meta property="og:title" content="A visual story — Else Away by Yaren" data-story-og-title>
   <meta property="og:description" content="A visual field note by Yaren for Else Away." data-story-og-description>
   <meta property="og:url" content="https://elseaway.com/story.html" data-story-og-url>
-  <meta property="og:image" content="https://elseaway.com/assets/hero-art.jpg" data-story-og-image>
+  <meta property="og:image" content="https://elseaway.com/assets/atlasophy-hero.webp" data-story-og-image>
   <meta name="twitter:card" content="summary_large_image">
   <meta name="twitter:title" content="A visual story — Else Away by Yaren" data-story-twitter-title>
   <meta name="twitter:description" content="A visual field note by Yaren for Else Away." data-story-twitter-description>
-  <meta name="twitter:image" content="https://elseaway.com/assets/hero-art.jpg" data-story-twitter-image>
+  <meta name="twitter:image" content="https://elseaway.com/assets/atlasophy-hero.webp" data-story-twitter-image>
   <link rel="canonical" href="https://elseaway.com/story.html" data-story-canonical>
   <link rel="icon" href="assets/favicon.svg" type="image/svg+xml">
   <title>Story — Else Away by Yaren</title>
-  <link rel="preconnect" href="https://fonts.googleapis.com">
-  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
-  <link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Cormorant+Garamond:ital,wght@0,400;0,500;1,400;1,500&display=swap">
   <link rel="stylesheet" href="styles.css">
   <link rel="stylesheet" href="story.css">
-  <script>
-    // set the theme before first paint so there is no flash of the wrong mode
-    (function () {
-      var saved = null;
-      try { saved = localStorage.getItem('elseaway-theme'); } catch (error) { saved = null; }
-      var theme = saved || (window.matchMedia('(prefers-color-scheme: light)').matches ? 'light' : 'dark');
-      document.documentElement.dataset.theme = theme;
-    })();
-  </script>
-  <script src="story-data.js" defer></script>
+  <script src="/api/content-script" defer></script>
+  <script src="content.js" defer></script>
   <script src="story.js" defer></script>
 </head>
 <body class="story-page">
@@ -42,14 +31,9 @@
   <div class="scroll-progress" aria-hidden="true"></div>
 
   <header class="story-header">
-    <a class="wordmark transition-link" href="index.html" aria-label="Else Away home"><span>elseaway</span><i>°</i></a>
+    <a class="wordmark transition-link" href="index.html" aria-label="Else Away home"><span>Else Away</span><i>°</i></a>
     <a class="story-back transition-link" href="index.html#work"><span>←</span> All stories</a>
-    <div class="story-actions">
-      <a class="story-contact transition-link" href="index.html#contact">Start a story <span>↗</span></a>
-      <button class="theme-toggle" type="button" data-theme-toggle aria-label="Switch to light mode">
-        <i class="is-sun" aria-hidden="true">☀</i><i class="is-moon" aria-hidden="true">☾</i>
-      </button>
-    </div>
+    <a class="story-contact" href="mailto:yarenkecici022@gmail.com">Start a story <span>↗</span></a>
   </header>
 
   <main id="story-main">
@@ -78,9 +62,8 @@
       <div>
         <p class="story-lead" data-story-body></p>
         <p>Else Away looks for what a standard travel guide misses: the weather on a window, the materials that hold a room together, and the small rituals that give a place its memory.</p>
-        <p class="story-closing">We rarely remember a place exactly as it was. We remember how it made us feel.</p>
       </div>
-      <p class="story-side-note">Photography · Visual stories<br>Hospitality · Place</p>
+      <p class="story-side-note">Photography · Film<br>Hospitality · Place</p>
     </section>
 
     <a class="next-story transition-link" data-next-story>
@@ -91,7 +74,7 @@
   </main>
 
   <footer class="story-footer">
-    <a class="wordmark transition-link" href="index.html"><span>elseaway</span><i>°</i></a>
+    <a class="wordmark transition-link" href="index.html"><span>Else Away</span><i>°</i></a>
     <p>By Atlasophy</p>
     <p>© <span data-year></span> Else Away</p>
   </footer>
