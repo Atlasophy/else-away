@@ -1,7 +1,10 @@
 /* Single source of truth for everything Yaren can edit.
    Phase 4 replaces this file with the same shape generated from D1, so
    nothing that reads it needs to change. */
-window.ELSE_AWAY = {
+/* Fallback snapshot. In production /api/content-script has already set this
+   from the database, and this file leaves it alone. Also the source that
+   tools/seed-from-content.py loads the database from. */
+window.ELSE_AWAY = window.ELSE_AWAY || {
   "site": {
     "email": "yarenkecici022@gmail.com",
     "emailSubject": "A place worth remembering",
