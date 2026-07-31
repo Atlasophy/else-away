@@ -19,5 +19,5 @@ bucket_name = "else-away-media"
 # Both are needed to verify the Cloudflare Access token on admin requests.
 # ACCESS_TEAM_DOMAIN looks like "yaren.cloudflareaccess.com".
 # ACCESS_AUD is the Application Audience tag from the Access application.
-ACCESS_TEAM_DOMAIN = "REPLACE_WITH_TEAM_DOMAIN"
-ACCESS_AUD = "REPLACE_WITH_APPLICATION_AUDIENCE_TAG"
+ACCESS_TEAM_DOMAIN = "atlasophy.cloudflareaccess.com"
+ACCESS_AUD = "3bdbc0f1c5c2cd68b04aefc90dcded9f642f3ad81f20c939d3a7c995f545d10f"
