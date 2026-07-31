@@ -101,3 +101,22 @@ python3 tools/seed-from-content.py
 
 Contact links currently use `yarenkecici022@gmail.com`, and Instagram links to
 `@saucerfulsecrets`.
+
+## Where things live
+
+- **Registrar**: Namecheap (renewal only — DNS is no longer managed there)
+- **DNS**: Cloudflare zone `elseaway.com`, nameservers `uma`/`watson.ns.cloudflare.com`
+- **Hosting**: Cloudflare Pages project `else-away`, apex and `www` both CNAME to
+  `else-away.pages.dev`
+- **Email**: five `eforward*.registrar-servers.com` MX records plus an SPF TXT,
+  all left on Namecheap's forwarding service and unaffected by the move
+
+Two things worth knowing before touching DNS again:
+
+An ALIAS record at an external provider does **not** satisfy a Pages custom
+domain. Pages verification looks for a literal CNAME, and an ALIAS resolves
+server-side into A records, so Cloudflare never sees one. Apex domains
+therefore need the zone on Cloudflare, where CNAME flattening handles it.
+
+Cloudflare Access can only gate a hostname inside a Cloudflare zone. The same
+underlying reason blocked `elseaway.com/admin` until the nameservers moved.
