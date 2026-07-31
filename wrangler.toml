@@ -9,7 +9,7 @@ compatibility_date = "2025-01-01"
 [[d1_databases]]
 binding = "DB"
 database_name = "else-away"
-database_id = "REPLACE_WITH_DATABASE_ID"
+database_id = "e7d36375-cc1e-413f-9d43-919017c874a7"
 
 [[r2_buckets]]
 binding = "MEDIA"
