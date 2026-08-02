@@ -150,6 +150,7 @@ h1 em, h2 em { font-weight: 400; }
 .journal-title-row h2 { font-size: clamp(56px, 6.2vw, 94px); }
 .journal-title-row p { color: rgba(241,234,220,.64); }
 .journal-controls { display: flex; align-items: center; justify-content: flex-end; gap: 10px; width: max-content; margin: 30px 0 0 auto; }
+.journal-controls[hidden] { display: none; }
 .journal-controls button { display: grid; place-items: center; width: 44px; height: 44px; padding: 0; border: 1px solid rgba(241,234,220,.42); border-radius: 50%; background: transparent; color: var(--cream); cursor: pointer; transition: color .18s, background .18s, border-color .18s, opacity .18s; }
 .journal-controls button:hover:not(:disabled) { border-color: var(--cream); background: rgba(241,234,220,.1); }
 .journal-controls button:disabled { opacity: .28; cursor: default; }
@@ -157,6 +158,8 @@ h1 em, h2 em { font-weight: 400; }
 .journal-rail { --journal-card-width: clamp(250px, 21vw, 330px); --journal-gutter: 8.5vw; position: relative; z-index: 2; overflow-x: auto; overflow-y: hidden; padding: 0 0 90px; perspective: 1200px; scroll-behavior: smooth; scroll-snap-type: x mandatory; scroll-padding-inline: var(--journal-gutter); scrollbar-width: none; overscroll-behavior-inline: contain; cursor: grab; -webkit-overflow-scrolling: touch; -webkit-mask-image: linear-gradient(90deg, transparent, #000 5vw, #000 calc(100% - 5vw), transparent); mask-image: linear-gradient(90deg, transparent, #000 5vw, #000 calc(100% - 5vw), transparent); }
 .journal-rail::-webkit-scrollbar { display: none; }
 .journal-rail.is-dragging { cursor: grabbing; scroll-snap-type: none; user-select: none; }
+.journal-rail.is-empty { cursor: default; scroll-snap-type: none; }
+.journal-rail.is-empty .journal-track, .journal-rail.is-empty .journal-set { width: 100%; padding-right: 0; padding-left: 0; }
 .journal-track { display: flex; width: max-content; padding: 0 max(var(--journal-gutter), calc(100vw - var(--journal-gutter) - var(--journal-card-width))) 0 var(--journal-gutter); }
 .journal-set { display: flex; flex: none; gap: 22px; }
 .journal-empty { margin: 0; padding: 34px 8.5vw 70px; color: rgba(241,234,220,.72); font: italic 22px/1.5 var(--serif); }

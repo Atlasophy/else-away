@@ -85,6 +85,7 @@ const journalTrack = document.querySelector('[data-journal-track]');
 const journalRail = document.querySelector('.journal-rail');
 const journalPrev = document.querySelector('[data-journal-prev]');
 const journalNext = document.querySelector('[data-journal-next]');
+const journalControls = document.querySelector('.journal-controls');
 const journalCurrent = document.querySelector('[data-journal-current]');
 const journalTotal = document.querySelector('[data-journal-total]');
 const journalAnnouncement = document.querySelector('[data-journal-announcement]');
@@ -100,6 +101,9 @@ if (journalRail && journalTrack) {
   let dragState = null;
   let suppressPostcardClick = false;
   let programmaticScroll = false;
+
+  journalRail.classList.toggle('is-empty', !journalCards.length);
+  journalControls.hidden = !journalCards.length;
 
   function cardOffset(index) {
     if (!journalCards.length) return 0;
