@@ -1,5 +1,5 @@
 /* The studio.
-   One page, four views, one Publish button. Everything is held in memory and
+   One page, three views, one Publish button. Everything is held in memory and
    written in a single save, so a half-finished edit never reaches the site. */
 
 const workspace = document.querySelector('[data-workspace]');
@@ -8,11 +8,10 @@ const publishButton = document.querySelector('[data-publish]');
 const picker = document.querySelector('[data-picker]');
 const pickerGrid = document.querySelector('[data-picker-grid]');
 
-const state = { content: null, view: 'stories', dirty: false, readOnly: false, images: [], problems: [] };
+const state = { content: null, view: 'postcards', dirty: false, readOnly: false, images: [], problems: [] };
 
-const slugify = value => value.toLowerCase().replace(/[''']/g, '')
-  .replace(/[^a-z0-9]+/g, '-').replace(/^-|-$/g, '').slice(0, 60);
 const escape = value => String(value ?? '').replace(/[&<>"]/g, c => ({ '&': '&amp;', '<': '&lt;', '>': '&gt;', '"': '&quot;' }[c]));
+const imageSrc = url => (url && (url.startsWith('http') || url.startsWith('/')) ? url : `../${url}`);
 
 function setStatus(message, tone = '') {
   statusLine.textContent = message;
@@ -37,7 +36,7 @@ async function load() {
     // No backend reachable — most likely running the site locally. Show the
     // real content so the studio can be tried, but never pretend it can save.
     const module = await import('../content.js').catch(() => null);
-    state.content = module ? window.ELSE_AWAY : { site: {}, seasons: [], postcards: [] };
+    state.content = module ? window.ELSE_AWAY : { site: {}, postcards: [] };
     state.readOnly = true;
     setStatus('Preview only — not connected, nothing can be saved', 'error');
   }
@@ -58,7 +57,7 @@ async function loadImages() {
 function render() {
   document.querySelectorAll('.tab').forEach(tab =>
     tab.setAttribute('aria-current', String(tab.dataset.view === state.view)));
-  const views = { stories: viewStories, postcards: viewPostcards, photos: viewPhotos, details: viewDetails };
+  const views = { postcards: viewPostcards, photos: viewPhotos, details: viewDetails };
   workspace.innerHTML = (state.problems.length ? problemsBlock() : '') + views[state.view]();
 }
 
@@ -68,88 +67,53 @@ const problemsBlock = () => `
     <ul>${state.problems.map(problem => `<li>${escape(problem)}</li>`).join('')}</ul>
   </div>`;
 
-function viewStories() {
+/* A postcard is a place: where, roughly when, a note about it, and however
+   many photographs it takes to remember it by. The first photograph is the
+   one the rail shows before anyone opens the card. */
+function postcardCard(index, card) {
+  const images = card.images ?? [];
   return `
-    <div class="view-head">
-      <h1>Stories</h1>
-      <p>Each season holds its own stories. Add as many as you like — the site
-         counts them for you. The location is what the “Explore this place”
-         button searches for on Google Maps.</p>
-    </div>
-    ${state.content.seasons.map((season, seasonIndex) => `
-      <details class="season" ${seasonIndex === 0 ? 'open' : ''}>
-        <summary>
-          <h2>${escape(season.label)}</h2>
-          <span class="season-film">${escape(season.film)}</span>
-          <span class="season-tally">${season.projects.length} ${season.projects.length === 1 ? 'story' : 'stories'}</span>
-        </summary>
-        <div class="season-body">
-          ${season.projects.map((project, index) => storyCard(seasonIndex, index, project)).join('')}
-          <button type="button" class="ghost add" data-add-story="${seasonIndex}">Add a story to ${escape(season.label)}</button>
+    <div class="card postcard-card" data-postcard="${index}">
+      <div class="fields">
+        <div class="field"><label for="pc-${index}">City</label>
+          <input id="pc-${index}" value="${escape(card.city)}" data-field="city" placeholder="Venice"></div>
+        <div class="field"><label for="pn-${index}">Country</label>
+          <input id="pn-${index}" value="${escape(card.country)}" data-field="country" placeholder="Italy"></div>
+        <div class="field"><label for="pd-${index}">Time</label>
+          <input id="pd-${index}" value="${escape(card.time)}" data-field="time" placeholder="2026"></div>
+        <div class="field wide"><label for="pt-${index}">Note</label>
+          <textarea id="pt-${index}" data-field="note" rows="3" placeholder="What this place was like.">${escape(card.note)}</textarea></div>
+      </div>
+      <div class="photo-field">
+        <label>Photographs</label>
+        <div class="photo-grid">
+          ${images.map((url, photoIndex) => `
+            <div class="photo-thumb">
+              <img src="${escape(imageSrc(url))}" alt="">
+              <button type="button" data-remove-photo="${index}.${photoIndex}" aria-label="Remove this photograph">✕</button>
+            </div>`).join('')}
+          <button type="button" class="ghost add photo-add" data-pick="postcards.${index}">+ Add photograph</button>
         </div>
-      </details>`).join('')}`;
-}
-
-const storyCard = (seasonIndex, index, project) => `
-  <div class="card" data-season="${seasonIndex}" data-index="${index}">
-    <div class="thumb ${project.image ? '' : 'is-empty'}">
-      ${project.image ? `<img src="${escape(project.image.startsWith('http') || project.image.startsWith('/') ? project.image : '../' + project.image)}" alt="">` : '<span>No photograph</span>'}
-      <button type="button" data-pick="stories.${seasonIndex}.${index}">Choose</button>
-    </div>
-    <div class="fields">
-      <div class="field"><label for="t-${seasonIndex}-${index}">Title</label>
-        <input id="t-${seasonIndex}-${index}" value="${escape(project.title)}" data-field="title">
-        <small class="slug-note">${escape(project.slug)}</small></div>
-      <div class="field"><label for="p-${seasonIndex}-${index}">Place</label>
-        <input id="p-${seasonIndex}-${index}" value="${escape(project.place)}" data-field="place"></div>
-      <div class="field"><label for="k-${seasonIndex}-${index}">Kind</label>
-        <input id="k-${seasonIndex}-${index}" value="${escape(project.type)}" data-field="type" placeholder="Stay, Café, Maker…"></div>
-      <div class="field"><label for="l-${seasonIndex}-${index}">Location for the map</label>
-        <input id="l-${seasonIndex}-${index}" value="${escape(project.location)}" data-field="location" placeholder="Provence France pottery studio"></div>
-      <div class="field wide"><label for="d-${seasonIndex}-${index}">Short line</label>
-        <textarea id="d-${seasonIndex}-${index}" data-field="deck" rows="2">${escape(project.deck)}</textarea></div>
-      <div class="field wide"><label for="s-${seasonIndex}-${index}">The story</label>
-        <textarea id="s-${seasonIndex}-${index}" data-field="story" rows="4">${escape(project.story)}</textarea></div>
+      </div>
       <div class="row-actions">
         <button type="button" class="ghost" data-move="up">Move up</button>
         <button type="button" class="ghost" data-move="down">Move down</button>
-        <button type="button" class="ghost danger" data-remove-story>Remove</button>
+        <button type="button" class="ghost danger" data-remove-postcard>Remove postcard</button>
       </div>
-    </div>
-  </div>`;
+    </div>`;
+}
 
 function viewPostcards() {
-  const options = state.content.seasons.flatMap(season =>
-    season.projects.map(project => ({ value: `${season.id}|${project.slug}`, label: `${season.label} — ${project.title}` })));
   return `
     <div class="view-head">
       <h1>Postcards</h1>
-      <p>The drifting row near the bottom of the site. Each postcard opens a
-         story, and its written side borrows that story's short line.</p>
+      <p>The drifting row near the bottom of the site. Give each one a city
+         and/or country, roughly when it was, a few photographs, and a note —
+         for example <em>Venice, Italy, 2026</em> with the story of why it
+         mattered. Publishing sends it straight to the site.</p>
     </div>
     <div class="season"><div class="season-body">
-      ${state.content.postcards.map((card, index) => `
-        <div class="card" data-postcard="${index}">
-          <div class="thumb ${card.image ? '' : 'is-empty'}">
-            ${card.image ? `<img src="${escape(card.image.startsWith('http') || card.image.startsWith('/') ? card.image : '../' + card.image)}" alt="">` : '<span>No photograph</span>'}
-            <button type="button" data-pick="postcards.${index}">Choose</button>
-          </div>
-          <div class="fields">
-            <div class="field wide"><label for="pt-${index}">Title</label>
-              <input id="pt-${index}" value="${escape(card.title)}" data-field="title"></div>
-            <div class="field"><label for="pm-${index}">Caption</label>
-              <input id="pm-${index}" value="${escape(card.meta)}" data-field="meta" placeholder="Menorca · After midnight"></div>
-            <div class="field"><label for="ps-${index}">Opens</label>
-              <select id="ps-${index}" data-field="target">
-                ${options.map(option => `<option value="${escape(option.value)}" ${option.value === `${card.season}|${card.story}` ? 'selected' : ''}>${escape(option.label)}</option>`).join('')}
-              </select></div>
-            <div class="row-actions">
-              <button type="button" class="ghost" data-move="up">Move up</button>
-              <button type="button" class="ghost" data-move="down">Move down</button>
-              <button type="button" class="ghost danger" data-remove-postcard>Remove</button>
-            </div>
-          </div>
-        </div>`).join('')}
+      ${state.content.postcards.map((card, index) => postcardCard(index, card)).join('')}
       <button type="button" class="ghost add" data-add-postcard>Add a postcard</button>
     </div></div>`;
 }
@@ -198,7 +162,7 @@ document.querySelectorAll('.tab').forEach(tab => tab.addEventListener('click', a
 
 workspace.addEventListener('input', event => {
   const field = event.target.dataset.field;
-  const card = event.target.closest('[data-season], [data-postcard]');
+  const card = event.target.closest('[data-postcard]');
 
   if (event.target.dataset.siteField) {
     state.content.site[event.target.dataset.siteField] = event.target.value;
@@ -206,23 +170,7 @@ workspace.addEventListener('input', event => {
   }
   if (!field || !card) return;
 
-  if (card.dataset.postcard !== undefined) {
-    const postcard = state.content.postcards[Number(card.dataset.postcard)];
-    if (field === 'target') {
-      const [season, story] = event.target.value.split('|');
-      Object.assign(postcard, { season, story });
-    } else postcard[field] = event.target.value;
-    return markDirty();
-  }
-
-  const project = state.content.seasons[Number(card.dataset.season)].projects[Number(card.dataset.index)];
-  project[field] = event.target.value;
-  // The slug is the story's address. It follows the title only while the story
-  // is new, so renaming a published story never breaks a link someone holds.
-  if (field === 'title' && project.isNew) {
-    project.slug = slugify(event.target.value) || 'untitled';
-    card.querySelector('.slug-note').textContent = project.slug;
-  }
+  state.content.postcards[Number(card.dataset.postcard)][field] = event.target.value;
   markDirty();
 });
 
@@ -230,38 +178,24 @@ workspace.addEventListener('click', event => {
   const button = event.target.closest('button');
   if (!button) return;
 
-  if (button.dataset.addStory !== undefined) {
-    const season = state.content.seasons[Number(button.dataset.addStory)];
-    season.projects.push({ slug: `untitled-${crypto.randomUUID().slice(0, 6)}`, title: '', type: '', place: '', location: '', image: '', deck: '', story: '', isNew: true });
-    markDirty(); return render();
-  }
   if (button.dataset.addPostcard !== undefined) {
-    const first = state.content.seasons[0];
-    state.content.postcards.push({ image: '', meta: '', title: '', season: first.id, story: first.projects[0]?.slug ?? '' });
-    markDirty(); return render();
-  }
-  if (button.hasAttribute('data-remove-story')) {
-    const card = button.closest('[data-season]');
-    const season = state.content.seasons[Number(card.dataset.season)];
-    const [removed] = season.projects.splice(Number(card.dataset.index), 1);
-    const orphans = state.content.postcards.filter(postcard => postcard.season === season.id && postcard.story === removed.slug);
-    if (orphans.length && !confirm(`${orphans.length} postcard(s) point at “${removed.title || 'this story'}”. Removing it will leave them pointing nowhere. Remove anyway?`)) {
-      season.projects.splice(Number(card.dataset.index), 0, removed);
-      return;
-    }
+    state.content.postcards.push({ city: '', country: '', time: '', note: '', images: [] });
     markDirty(); return render();
   }
   if (button.hasAttribute('data-remove-postcard')) {
     state.content.postcards.splice(Number(button.closest('[data-postcard]').dataset.postcard), 1);
     markDirty(); return render();
   }
+  if (button.dataset.removePhoto) {
+    const [cardIndex, photoIndex] = button.dataset.removePhoto.split('.').map(Number);
+    state.content.postcards[cardIndex].images.splice(photoIndex, 1);
+    markDirty(); return render();
+  }
   if (button.dataset.move) {
-    const card = button.closest('[data-season], [data-postcard]');
+    const card = button.closest('[data-postcard]');
     const step = button.dataset.move === 'up' ? -1 : 1;
-    const list = card.dataset.postcard !== undefined
-      ? state.content.postcards
-      : state.content.seasons[Number(card.dataset.season)].projects;
-    const from = Number(card.dataset.postcard ?? card.dataset.index);
+    const list = state.content.postcards;
+    const from = Number(card.dataset.postcard);
     const to = from + step;
     if (to < 0 || to >= list.length) return;
     [list[from], list[to]] = [list[to], list[from]];
@@ -293,13 +227,14 @@ document.querySelector('[data-picker-close]').addEventListener('click', () => { 
 picker.addEventListener('click', event => { if (event.target === picker) picker.hidden = true; });
 document.addEventListener('keydown', event => { if (event.key === 'Escape' && !picker.hidden) picker.hidden = true; });
 
+/* Picking a photograph for a postcard adds it to that card's gallery rather
+   than replacing anything, since a postcard can hold as many as Yaren likes. */
 pickerGrid.addEventListener('click', event => {
   const chosen = event.target.closest('[data-choose]');
   if (!chosen || !pickerTarget) return;
-  const [kind, a, b] = pickerTarget.split('.');
+  const [kind, a] = pickerTarget.split('.');
   const url = chosen.dataset.choose;
-  if (kind === 'stories') state.content.seasons[Number(a)].projects[Number(b)].image = url;
-  else state.content.postcards[Number(a)].image = url;
+  if (kind === 'postcards') state.content.postcards[Number(a)].images.push(url);
   picker.hidden = true;
   markDirty();
   render();
@@ -355,10 +290,6 @@ publishButton.addEventListener('click', async () => {
 
   const payload = {
     site: state.content.site,
-    seasons: state.content.seasons.map(season => ({
-      ...season,
-      projects: season.projects.map(({ isNew, ...project }) => project),
-    })),
     postcards: state.content.postcards,
   };
 
@@ -375,7 +306,6 @@ publishButton.addEventListener('click', async () => {
       publishButton.disabled = false;
       return render();
     }
-    state.content.seasons.forEach(season => season.projects.forEach(project => delete project.isNew));
     state.dirty = false;
     setStatus('Published', 'saved');
     render();

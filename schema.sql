@@ -10,42 +10,30 @@ CREATE TABLE IF NOT EXISTS site (
   value TEXT NOT NULL
 );
 
-CREATE TABLE IF NOT EXISTS seasons (
-  id       TEXT PRIMARY KEY,          -- spring | summer | autumn | winter
-  label    TEXT NOT NULL,
-  film     TEXT NOT NULL,             -- stock name shown above the season note
-  note     TEXT NOT NULL,
-  position INTEGER NOT NULL
-);
-
-CREATE TABLE IF NOT EXISTS projects (
-  id        INTEGER PRIMARY KEY AUTOINCREMENT,
-  season_id TEXT NOT NULL REFERENCES seasons(id) ON DELETE CASCADE,
-  slug      TEXT NOT NULL,
-  title     TEXT NOT NULL,
-  type      TEXT NOT NULL,
-  place     TEXT NOT NULL,
-  location  TEXT NOT NULL,            -- free text, becomes the Google Maps query
-  image     TEXT NOT NULL,
-  deck      TEXT NOT NULL,
-  story     TEXT NOT NULL,
-  position  INTEGER NOT NULL,
-  -- Slugs address stories in URLs, so they must be unique within a season.
-  UNIQUE (season_id, slug)
-);
-
+-- A postcard is a place: where, roughly when, what it looked like, and a
+-- note about it. Publishing writes the whole table in one pass (see
+-- functions/lib/content.js), so position is reassigned every time rather
+-- than something the UI has to maintain by hand.
 CREATE TABLE IF NOT EXISTS postcards (
   id         INTEGER PRIMARY KEY AUTOINCREMENT,
-  image      TEXT NOT NULL,
-  meta       TEXT NOT NULL,
-  title      TEXT NOT NULL,
-  season_id  TEXT NOT NULL REFERENCES seasons(id) ON DELETE CASCADE,
-  story_slug TEXT NOT NULL,
+  city       TEXT NOT NULL DEFAULT '',
+  country    TEXT NOT NULL DEFAULT '',
+  time_label TEXT NOT NULL DEFAULT '',
+  note       TEXT NOT NULL DEFAULT '',
   position   INTEGER NOT NULL
 );
 
-CREATE INDEX IF NOT EXISTS idx_projects_season ON projects(season_id, position);
+-- A postcard can carry more than one photograph, shown in the lightbox in
+-- this order. Deleting a postcard cascades to its photographs.
+CREATE TABLE IF NOT EXISTS postcard_images (
+  id          INTEGER PRIMARY KEY AUTOINCREMENT,
+  postcard_id INTEGER NOT NULL REFERENCES postcards(id) ON DELETE CASCADE,
+  image       TEXT NOT NULL,
+  position    INTEGER NOT NULL DEFAULT 0
+);
+
 CREATE INDEX IF NOT EXISTS idx_postcards_order ON postcards(position);
+CREATE INDEX IF NOT EXISTS idx_postcard_images ON postcard_images(postcard_id, position);
 
 -- Every image Yaren uploads, so the dashboard can offer a picker rather than
 -- asking her to remember filenames.

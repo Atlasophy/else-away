@@ -22,11 +22,10 @@ npx serve .
 
 ## Customize
 
-- Stories, postcards, and site details: `content.js` — the single source of truth
+- Postcards and site details: `content.js` — the single source of truth
 - Main page copy and links: `index.html`
 - Colors and layout: `styles.css`
-- Homepage interactions: `script.js`
-- Story detail page: `story.html`, `story.css`, and `story.js`
+- Homepage interactions, including the postcard lightbox: `script.js`
 - Images and favicon: `assets/`
 
 Once the studio is live (below), `content.js` is generated from the database and
@@ -34,9 +33,12 @@ Yaren edits everything through `/admin` instead.
 
 ## The studio
 
-`/admin` is where Yaren adds stories, uploads photographs, writes, and sets the
-map location for each place. Opening it locally shows the real content but
-refuses to save, since there is no database to save to.
+`/admin` is where Yaren adds postcards, uploads photographs, and writes. Each
+postcard holds a city, a country, roughly when it was, a note, and however many
+photographs it takes to remember the place by — for example *Venice, Italy,
+2026* with a handful of photographs and a short note about it. Opening `/admin`
+locally shows the real content but refuses to save, since there is no database
+to save to.
 
 Photographs are resized and converted to webp **in the browser** before upload,
 so originals straight from a camera are fine and nothing large crosses the

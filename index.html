@@ -39,7 +39,6 @@
     <nav class="desktop-nav" aria-label="Primary navigation">
       <a href="#about">About me</a>
       <a href="#work-with-me">Work with me</a>
-      <a href="#work">Selected work</a>
       <a href="#journal">Postcards</a>
     </nav>
     <a class="header-cta" href="mailto:yarenkecici022@gmail.com">Start a story <span aria-hidden="true">↗</span></a>
@@ -50,7 +49,6 @@
   <nav class="mobile-menu" aria-label="Mobile navigation" data-mobile-menu>
     <a href="#about">About me</a>
     <a href="#work-with-me">Work with me</a>
-    <a href="#work">A year in stories</a>
     <a href="#journal">Postcards</a>
     <a href="#contact">Start a story</a>
   </nav>
@@ -99,8 +97,11 @@
     <section class="about section-pad" id="about" aria-labelledby="about-title">
       <div class="about-collage reveal" data-parallax="0.07">
         <figure class="polaroid">
-          <img src="assets/mirror.jpeg" alt="Yaren smiling in a mirror, holding her camera" width="900" height="1600" loading="lazy">
+          <img src="assets/mirror.jpeg" alt="Yaren smiling in a mirror, holding her camera" width="610" height="1086" loading="lazy">
           <figcaption>the eye behind it all °</figcaption>
+        </figure>
+        <figure class="polaroid polaroid--secondary">
+          <img src="assets/mirror-closeup.jpg" alt="Close-up portrait of Yaren" width="945" height="1016" loading="lazy">
         </figure>
       </div>
       <div class="about-copy reveal">
@@ -143,42 +144,10 @@
       </div>
     </section>
 
-    <section class="portfolio" id="work" data-season="spring" aria-labelledby="work-title">
-      <div class="portfolio-heading section-pad">
-        <div class="section-meta reveal">
-          <p>04 <span></span> Selected work</p>
-          <p class="project-count"><b data-current-count>01</b> / <span data-total-count>05</span></p>
-        </div>
-        <div class="work-title-row reveal">
-          <h2 id="work-title">A year in <em>stories.</em></h2>
-          <p>Every season carries its own rhythm.<br>Choose one, then open a story.</p>
-        </div>
-        <div class="season-tabs reveal" role="tablist" aria-label="Choose a season">
-          <button role="tab" aria-selected="true" data-season-button="spring">Spring <i>01</i></button>
-          <button role="tab" aria-selected="false" data-season-button="summer">Summer <i>02</i></button>
-          <button role="tab" aria-selected="false" data-season-button="autumn">Autumn <i>03</i></button>
-          <button role="tab" aria-selected="false" data-season-button="winter">Winter <i>04</i></button>
-        </div>
-      </div>
-
-      <div class="gallery-shell reveal">
-        <div class="gallery-viewport" data-gallery tabindex="0" aria-label="Seasonal project gallery">
-          <div class="gallery-track" data-gallery-track></div>
-        </div>
-        <div class="gallery-controls">
-          <p data-season-note>Soft light, new rituals, open windows.</p>
-          <div>
-            <button type="button" aria-label="Previous project" data-gallery-prev>←</button>
-            <button type="button" aria-label="Next project" data-gallery-next>→</button>
-          </div>
-        </div>
-      </div>
-    </section>
-
     <section class="journal" id="journal" aria-labelledby="journal-title">
       <div class="journal-heading section-pad">
         <div class="section-meta reveal">
-          <p>05 <span></span> From the road</p>
+          <p>04 <span></span> From the road</p>
           <p class="journal-drift-note">Stories in motion <span>←</span></p>
         </div>
         <div class="journal-title-row reveal">
@@ -189,8 +158,27 @@
       <div class="journal-rail" id="journal-grid">
         <div class="journal-track" data-journal-track>
           <div class="journal-set" data-journal-set></div>
+        </div>
       </div>
     </section>
+
+    <div class="postcard-lightbox" data-postcard-lightbox hidden>
+      <div class="postcard-lightbox-backdrop" data-postcard-lightbox-close></div>
+      <div class="postcard-lightbox-inner" role="dialog" aria-modal="true" aria-label="Postcard">
+        <button type="button" class="postcard-lightbox-close" data-postcard-lightbox-close aria-label="Close">✕</button>
+        <div class="postcard-lightbox-media">
+          <img data-postcard-lightbox-image src="" alt="">
+          <button type="button" class="postcard-lightbox-nav prev" data-postcard-lightbox-prev aria-label="Previous photograph">←</button>
+          <button type="button" class="postcard-lightbox-nav next" data-postcard-lightbox-next aria-label="Next photograph">→</button>
+          <span class="postcard-lightbox-count" data-postcard-lightbox-count></span>
+        </div>
+        <div class="postcard-lightbox-text">
+          <p class="postcard-lightbox-meta" data-postcard-lightbox-meta></p>
+          <h3 data-postcard-lightbox-place></h3>
+          <p class="postcard-lightbox-note" data-postcard-lightbox-note></p>
+        </div>
+      </div>
+    </div>
 
     <section class="contact" id="contact" aria-labelledby="contact-title">
       <div class="contact-inner reveal">

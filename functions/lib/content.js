@@ -3,78 +3,55 @@
    site consumes either source without knowing which it got. */
 
 export async function readContent(db) {
-  const [site, seasons, projects, postcards] = await Promise.all([
+  const [site, postcards, images] = await Promise.all([
     db.prepare('SELECT key, value FROM site').all(),
-    db.prepare('SELECT id, label, film, note FROM seasons ORDER BY position').all(),
-    db.prepare('SELECT season_id, slug, title, type, place, location, image, deck, story FROM projects ORDER BY season_id, position').all(),
-    db.prepare('SELECT image, meta, title, season_id, story_slug FROM postcards ORDER BY position').all(),
+    db.prepare('SELECT id, city, country, time_label, note, position FROM postcards ORDER BY position').all(),
+    db.prepare('SELECT postcard_id, image, position FROM postcard_images ORDER BY postcard_id, position').all(),
   ]);
 
-  const bySeason = new Map(seasons.results.map(season => [season.id, { ...season, projects: [] }]));
-  for (const row of projects.results) {
-    bySeason.get(row.season_id)?.projects.push({
-      slug: row.slug,
-      title: row.title,
-      type: row.type,
-      place: row.place,
-      location: row.location,
-      image: row.image,
-      deck: row.deck,
-      story: row.story,
-    });
+  const imagesByCard = new Map();
+  for (const row of images.results) {
+    if (!imagesByCard.has(row.postcard_id)) imagesByCard.set(row.postcard_id, []);
+    imagesByCard.get(row.postcard_id).push(row.image);
   }
 
   return {
     site: Object.fromEntries(site.results.map(row => [row.key, row.value])),
-    seasons: [...bySeason.values()],
     postcards: postcards.results.map(row => ({
-      image: row.image,
-      meta: row.meta,
-      title: row.title,
-      season: row.season_id,
-      story: row.story_slug,
+      city: row.city,
+      country: row.country,
+      time: row.time_label,
+      note: row.note,
+      images: imagesByCard.get(row.id) ?? [],
     })),
   };
 }
 
-/* Rejects rather than half-saves. A story whose slug collides with another in
-   the same season would silently steal its URL, so that is caught here as well
-   as by the UNIQUE constraint. */
+/* Rejects rather than half-saves. A postcard with no photograph would show a
+   blank frame on the site, so that is caught here before it ever reaches the
+   database. */
 export function validateContent(payload) {
   const errors = [];
   if (!payload || typeof payload !== 'object') return ['Payload must be an object.'];
-  if (!Array.isArray(payload.seasons) || payload.seasons.length === 0) errors.push('At least one season is required.');
+  if (!Array.isArray(payload.postcards)) errors.push('Postcards must be a list.');
 
-  for (const season of payload.seasons ?? []) {
-    if (!season.id) errors.push('A season is missing its id.');
-    const slugs = new Set();
-    for (const project of season.projects ?? []) {
-      if (!project.slug) errors.push(`A story in ${season.id || 'a season'} is missing its slug.`);
-      if (!project.title) errors.push(`A story in ${season.id || 'a season'} is missing its title.`);
-      if (!project.image) errors.push(`"${project.title || project.slug}" has no photograph.`);
-      if (slugs.has(project.slug)) errors.push(`Two stories in ${season.id} share the slug "${project.slug}".`);
-      slugs.add(project.slug);
-    }
-  }
-
-  const seasonIds = new Set((payload.seasons ?? []).map(season => season.id));
   for (const card of payload.postcards ?? []) {
-    if (!seasonIds.has(card.season)) errors.push(`A postcard points at the unknown season "${card.season}".`);
-    const season = (payload.seasons ?? []).find(entry => entry.id === card.season);
-    if (season && !season.projects?.some(project => project.slug === card.story)) {
-      errors.push(`The postcard "${card.title}" points at a story that no longer exists.`);
-    }
+    const label = [card.city, card.country].filter(Boolean).join(', ') || 'A postcard';
+    if (!card.city && !card.country) errors.push(`${label} needs at least a city or a country.`);
+    if (!Array.isArray(card.images) || card.images.length === 0) errors.push(`"${label}" has no photograph.`);
   }
   return errors;
 }
 
 /* D1 has no interactive transactions, so the whole save goes through batch(),
-   which is atomic. A failed save leaves the previous content untouched. */
+   which is atomic. A failed save leaves the previous content untouched.
+   Postcard ids are reassigned on every publish (1, 2, 3…) rather than kept
+   stable, since nothing outside this table links to them — that sidesteps
+   needing the id D1 would generate mid-batch just to link its photographs. */
 export async function writeContent(db, payload) {
   const statements = [
+    db.prepare('DELETE FROM postcard_images'),
     db.prepare('DELETE FROM postcards'),
-    db.prepare('DELETE FROM projects'),
-    db.prepare('DELETE FROM seasons'),
     db.prepare('DELETE FROM site'),
   ];
 
@@ -82,20 +59,16 @@ export async function writeContent(db, payload) {
     statements.push(db.prepare('INSERT INTO site (key, value) VALUES (?, ?)').bind(key, String(value)));
   }
 
-  payload.seasons.forEach((season, index) => {
-    statements.push(db.prepare('INSERT INTO seasons (id, label, film, note, position) VALUES (?, ?, ?, ?, ?)')
-      .bind(season.id, season.label ?? season.id, season.film ?? '', season.note ?? '', index));
-    (season.projects ?? []).forEach((project, order) => {
-      statements.push(db.prepare(
-        'INSERT INTO projects (season_id, slug, title, type, place, location, image, deck, story, position) VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, ?)'
-      ).bind(season.id, project.slug, project.title, project.type ?? '', project.place ?? '',
-        project.location ?? '', project.image, project.deck ?? '', project.story ?? '', order));
-    });
-  });
-
   (payload.postcards ?? []).forEach((card, index) => {
-    statements.push(db.prepare('INSERT INTO postcards (image, meta, title, season_id, story_slug, position) VALUES (?, ?, ?, ?, ?, ?)')
-      .bind(card.image, card.meta ?? '', card.title ?? '', card.season, card.story, index));
+    const id = index + 1;
+    statements.push(db.prepare(
+      'INSERT INTO postcards (id, city, country, time_label, note, position) VALUES (?, ?, ?, ?, ?, ?)'
+    ).bind(id, card.city ?? '', card.country ?? '', card.time ?? '', card.note ?? '', index));
+    (card.images ?? []).forEach((image, imageIndex) => {
+      statements.push(db.prepare(
+        'INSERT INTO postcard_images (postcard_id, image, position) VALUES (?, ?, ?)'
+      ).bind(id, image, imageIndex));
+    });
   });
 
   await db.batch(statements);

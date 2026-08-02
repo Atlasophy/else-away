@@ -12,8 +12,6 @@
   --line: rgba(35, 30, 23, .18);
   --amber: #c9954f;
   --amber-soft: #e5bd83;
-  --accent: #82946b;
-  --season-bg: #dbe1c7;
   --shadow-print: 0 34px 80px rgba(26,18,10,.44), 0 6px 18px rgba(26,18,10,.28);
   --shadow-lift: 0 48px 96px rgba(26,18,10,.5), 0 10px 26px rgba(26,18,10,.3);
   --serif: Iowan Old Style, Baskerville, "Times New Roman", serif;
@@ -30,14 +28,14 @@ button { color: inherit; font: inherit; }
 .page-ready .page-wipe { transform: translateY(-100%); }
 .page-leaving .page-wipe { transform: translateY(0); }
 .scroll-progress { position: fixed; z-index: 100; top: 0; left: 0; width: var(--scroll-progress, 0%); height: 2px; background: #d39a61; pointer-events: none; transition: width .08s linear; }
-.home-page::after, .story-page::after { content: ""; position: fixed; z-index: 80; inset: -6%; opacity: .042; pointer-events: none; background-image: url("data:image/svg+xml,%3Csvg viewBox='0 0 180 180' xmlns='http://www.w3.org/2000/svg'%3E%3Cfilter id='n'%3E%3CfeTurbulence type='fractalNoise' baseFrequency='.85' numOctaves='3' stitchTiles='stitch'/%3E%3C/filter%3E%3Crect width='100%25' height='100%25' filter='url(%23n)' opacity='.55'/%3E%3C/svg%3E"); animation: grainShift 1.1s steps(1) infinite; }
+.home-page::after { content: ""; position: fixed; z-index: 80; inset: -6%; opacity: .042; pointer-events: none; background-image: url("data:image/svg+xml,%3Csvg viewBox='0 0 180 180' xmlns='http://www.w3.org/2000/svg'%3E%3Cfilter id='n'%3E%3CfeTurbulence type='fractalNoise' baseFrequency='.85' numOctaves='3' stitchTiles='stitch'/%3E%3C/filter%3E%3Crect width='100%25' height='100%25' filter='url(%23n)' opacity='.55'/%3E%3C/svg%3E"); animation: grainShift 1.1s steps(1) infinite; }
 .skip-link { position: fixed; z-index: 1000; top: 8px; left: 8px; padding: 10px 14px; background: white; transform: translateY(-150%); }
 .skip-link:focus { transform: none; }
 
 /* Every interactive element gets a visible focus ring. Colour comes from
    currentColor so it stays legible on paper, green and coffee grounds alike. */
 :where(a, button, [tabindex]):focus-visible { outline: 2px solid currentColor; outline-offset: 4px; border-radius: 1px; }
-.project-card:focus-visible, .journal-card-link:focus-visible { outline: 2px solid var(--amber-soft); outline-offset: 5px; }
+.journal-card-link:focus-visible { outline: 2px solid var(--amber-soft); outline-offset: 5px; }
 
 /* Grain sits over everything at low opacity and drifts a frame at a time, the
    way projected film never holds perfectly still. */
@@ -67,7 +65,7 @@ button { color: inherit; font: inherit; }
 .hero-content { position: absolute; z-index: 2; left: 8.5vw; top: 43%; transform: translateY(-45%); }
 .eyebrow { margin: 0 0 26px; font-size: 10px; font-weight: 600; letter-spacing: .2em; text-transform: uppercase; }
 .eyebrow.light { color: rgba(255,255,255,.78); }
-.hero h1, .work-title-row h2, .about h2, .wwm-inner h2, .journal h2, .contact h2 { margin: 0; font: 400 clamp(66px, 9.3vw, 150px)/.8 var(--serif); letter-spacing: -.06em; }
+.hero h1, .about h2, .wwm-inner h2, .journal h2, .contact h2 { margin: 0; font: 400 clamp(66px, 9.3vw, 150px)/.8 var(--serif); letter-spacing: -.06em; }
 h1 em, h2 em { font-weight: 400; }
 .hero h1 em { margin-left: .55em; }
 .hero-copy { margin: 35px 0 0 10px; color: rgba(255,255,255,.86); font: 16px/1.55 var(--serif); }
@@ -116,55 +114,16 @@ h1 em, h2 em { font-weight: 400; }
 .wwm-grid h3 { margin: 0 0 9px; font: 22px/1.25 var(--serif); }
 .wwm-grid p { margin: 0; color: rgba(241,234,220,.92); font: 15px/1.6 var(--serif); }
 
-/* Each season is graded as a film stock: the palette, the stock name in the
-   controls, and the grade applied to the photographs all shift together. */
-.portfolio { --accent: #5b6745; --season-bg: #dfe0cd; --film: "Portra 400"; --film-grade: saturate(.94) contrast(.97) sepia(.06); background: var(--season-bg); transition: background .7s ease; overflow: hidden; }
-.portfolio[data-season="summer"] { --accent: #2c6777; --season-bg: #cfdde2; --film: "Ektachrome E100"; --film-grade: saturate(1.14) contrast(1.07); }
-.portfolio[data-season="autumn"] { --accent: #824a1b; --season-bg: #e3cba2; --film: "Kodak Gold 200"; --film-grade: saturate(1.06) contrast(1.01) sepia(.18); }
-.portfolio[data-season="winter"] { --accent: #4b5b62; --season-bg: #d7dadb; --film: "Ilford HP5"; --film-grade: saturate(.4) contrast(1.1); }
-.portfolio-heading { padding-bottom: 66px; }
-.section-meta { display: flex; align-items: center; justify-content: space-between; }
-.section-meta p { margin: 0; }
-.project-count b { color: var(--accent); font-weight: 600; transition: color .4s; }
-.work-title-row, .journal-title-row { display: flex; justify-content: space-between; align-items: end; margin-top: 48px; }
-.work-title-row h2 { font-size: clamp(58px, 8vw, 120px); }
-.work-title-row p, .journal-title-row p { margin: 0 0 8px; font: 15px/1.55 var(--serif); }
-.season-tabs { display: grid; grid-template-columns: repeat(4, 1fr); margin-top: 78px; border-bottom: 1px solid rgba(24,32,25,.25); scrollbar-width: none; }
-.season-tabs::-webkit-scrollbar { display: none; }
-.season-tabs button { position: relative; display: flex; justify-content: space-between; padding: 18px 12px 18px 0; border: 0; background: none; opacity: .45; cursor: pointer; font: 25px var(--serif); text-align: left; transition: opacity .25s; }
-.season-tabs button::after { content: ""; position: absolute; right: 0; bottom: -1px; left: 0; height: 2px; background: var(--accent); transform: scaleX(0); transform-origin: left; transition: transform .35s, background .5s; }
-.season-tabs button[aria-selected="true"] { opacity: 1; }
-.season-tabs button[aria-selected="true"]::after { transform: scaleX(1); }
-.season-tabs i { padding-top: 6px; font: 9px var(--sans); }
-.gallery-shell { padding-bottom: 90px; }
-/* Sprocket perforations use background-attachment:local so they travel with
-   the frames as the strip is dragged, rather than sitting over a fixed edge. */
-.gallery-viewport { overflow-x: auto; scrollbar-width: none; cursor: grab; scroll-snap-type: x mandatory; scroll-behavior: smooth; outline-offset: -3px; padding-block: 17px; background-image: repeating-linear-gradient(90deg, rgba(24,32,25,.20) 0 9px, transparent 9px 24px), repeating-linear-gradient(90deg, rgba(24,32,25,.20) 0 9px, transparent 9px 24px); background-size: 24px 5px; background-position: 12px 6px, 12px calc(100% - 6px); background-repeat: repeat-x; background-attachment: local; }
-.gallery-viewport::-webkit-scrollbar { display: none; }
-.gallery-viewport.dragging { cursor: grabbing; scroll-snap-type: none; scroll-behavior: auto; user-select: none; }
-.gallery-track { display: flex; width: max-content; gap: 18px; padding: 0 8.5vw; }
-.project-card { position: relative; display: block; flex: 0 0 clamp(245px, 26vw, 420px); aspect-ratio: .76; overflow: hidden; scroll-snap-align: start; background: #9ca394; outline-offset: 5px; }
-.project-image { position: absolute; inset: 0; width: 100%; height: 100%; object-fit: cover; filter: var(--film-grade); transition: scale .8s cubic-bezier(.2,.65,.25,1), filter .7s ease; }
-.project-card::after { content: ""; position: absolute; inset: 32% 0 0; background: linear-gradient(transparent, rgba(10,12,9,.76)); transition: opacity .35s; }
-.project-card:hover .project-image, .project-card:focus-visible .project-image { scale: 1.055; }
-.frame-mark { position: absolute; z-index: 2; top: 16px; left: 18px; color: rgba(255,255,255,.72); font: 500 10px/1 var(--mono); letter-spacing: .12em; text-shadow: 0 1px 5px rgba(10,12,9,.55); }
-.project-info { position: absolute; z-index: 2; right: 25px; bottom: 23px; left: 25px; color: white; }
-.project-info p { margin: 0 0 8px; font-family: var(--mono); font-size: 9px; letter-spacing: .15em; text-transform: uppercase; }
-.project-info h3 { margin: 0; font: 31px/1.05 var(--serif); transition: transform .35s cubic-bezier(.2,.65,.25,1); }
-.project-open { display: flex; justify-content: space-between; align-items: center; height: 0; overflow: hidden; opacity: 0; font-size: 9px; font-weight: 600; letter-spacing: .15em; text-transform: uppercase; transition: height .35s, opacity .35s, margin .35s; }
-.project-open i { display: grid; place-items: center; width: 30px; height: 30px; border: 1px solid rgba(255,255,255,.65); border-radius: 50%; font-style: normal; }
-.project-card:hover .project-open, .project-card:focus-visible .project-open { height: 30px; margin-top: 16px; opacity: 1; }
-.gallery-controls { display: flex; justify-content: space-between; align-items: center; padding: 25px 8.5vw 0; }
-.gallery-controls > p { display: flex; flex-direction: column; gap: 8px; margin: 0; font: italic 17px var(--serif); }
-.gallery-controls > p::before { content: var(--film); color: var(--accent); font: 500 9px/1 var(--mono); letter-spacing: .2em; text-transform: uppercase; transition: color .5s ease; }
-.gallery-controls div { display: flex; gap: 9px; }
-.gallery-controls button { width: 45px; height: 45px; border: 1px solid rgba(24,32,25,.55); border-radius: 50%; background: transparent; cursor: pointer; transition: color .2s, background .2s; }
-.gallery-controls button:hover { color: white; background: var(--ink); }
 
 .about { position: relative; overflow: hidden; display: grid; grid-template-columns: 1.1fr 1fr; gap: 10vw; align-items: center; min-height: 900px; padding-bottom: 165px; color: var(--cream); background: linear-gradient(180deg, var(--green) 0%, var(--green) 58%, #2b3d33 80%, var(--green-lift) 100%); }
 /* A physical print, tilted as if set down on a table. The caption sits in the
    white margin below the image rather than over it. */
-.about-collage { display: grid; place-items: center; transform: translate3d(0, var(--parallax-shift, 0px), 0); will-change: transform; }
+.about-collage { position: relative; display: grid; place-items: center; transform: translate3d(0, var(--parallax-shift, 0px), 0); will-change: transform; }
+/* A second print, smaller and turned the other way, tucked into the corner
+   as if it had been set down on top of the first. */
+.polaroid--secondary { position: absolute; z-index: 3; left: -16%; bottom: -10%; width: min(180px, 16vw); padding: 11px 11px 15px; transform: rotate(8deg); }
+.polaroid--secondary:hover { transform: rotate(10deg) translateY(-4px); }
+.polaroid--secondary img { width: 100%; }
 .polaroid { margin: 0; padding: 16px 16px 74px; background: #f6f1ea; box-shadow: 0 34px 80px rgba(0,0,0,.42), 0 6px 18px rgba(0,0,0,.26); transform: rotate(-3.5deg); transition: transform .6s cubic-bezier(.2,.65,.25,1); }
 .polaroid:hover { transform: rotate(-1.2deg) translateY(-6px); }
 /* Shown at the photograph's own proportions. No crop, no grade. */
@@ -213,7 +172,7 @@ h1 em, h2 em { font-weight: 400; }
 .journal-card:hover .journal-image { transform: translateY(-5px) scale(1.015); filter: brightness(1.05); }
 .post-meta { margin: 17px 0 10px; color: #b6c2ad; font-family: var(--mono); font-size: 8px; letter-spacing: .17em; text-transform: uppercase; }
 .journal-card h3 { max-width: 315px; min-height: 50px; margin: 0 0 18px; color: var(--cream); font: 22px/1.12 var(--serif); }
-.journal-card-link { display: block; }
+.journal-card-link { display: block; width: 100%; padding: 0; border: 0; background: none; color: inherit; font: inherit; text-align: left; cursor: pointer; }
 .journal-front .journal-cta { display: inline-flex; gap: 25px; padding-bottom: 5px; border-bottom: 1px solid rgba(241,234,220,.55); color: rgba(241,234,220,.82); font-size: 8px; font-weight: 600; letter-spacing: .15em; text-transform: uppercase; }
 
 .contact { position: relative; min-height: 780px; display: flex; flex-direction: column; justify-content: space-between; padding: 130px 4.5vw 35px; color: var(--cream); background: var(--coffee); overflow: hidden; }
@@ -271,9 +230,7 @@ footer div { display: flex; gap: 25px; font-size: 9px; letter-spacing: .12em; te
   .services { grid-template-columns: 1fr 1fr; margin-top: 65px; }
   .services span { border-bottom: 1px solid var(--line); }
   .services span:nth-child(odd) { padding-left: 0; }
-  .work-title-row, .journal-title-row { align-items: start; flex-direction: column; gap: 30px; }
-  .season-tabs { overflow-x: auto; grid-template-columns: repeat(4, minmax(140px, 1fr)); overscroll-behavior-inline: contain; }
-  .project-card { flex-basis: min(76vw, 360px); }
+  .journal-title-row { align-items: start; flex-direction: column; gap: 30px; }
   .about { grid-template-columns: 1fr; gap: 80px; padding-bottom: 135px; }
   .polaroid img { width: min(320px, 62vw); }
   .about-copy { max-width: 650px; }
@@ -293,13 +250,7 @@ footer div { display: flex; gap: 25px; font-size: 9px; letter-spacing: .12em; te
   .display-copy br { display: none; }
   .services { grid-template-columns: 1fr; }
   .services span, .services span:not(:first-child) { padding: 17px 0; border-right: 0; }
-  .work-title-row h2, .journal-title-row h2 { font-size: 57px; }
-  .season-tabs { grid-template-columns: repeat(2, 1fr); margin-top: 52px; overflow: visible; }
-  .season-tabs button:nth-child(n+3) { border-top: 1px solid rgba(24,32,25,.14); }
-  .gallery-track { padding-left: 7vw; padding-right: 7vw; }
-  .gallery-controls { padding-right: 7vw; padding-left: 7vw; }
-  .gallery-controls > p { max-width: 55%; font-size: 15px; }
-  .project-open { height: 30px; margin-top: 12px; opacity: 1; }
+  .journal-title-row h2 { font-size: 57px; }
   .about h2 { font-size: 52px; }
   .polaroid { padding-bottom: 58px; transform: rotate(-2.5deg); }
   .polaroid img { width: 72vw; }
@@ -322,9 +273,38 @@ footer div { display: flex; gap: 25px; font-size: 9px; letter-spacing: .12em; te
      dust and a jittering grain plate have no meaning without their movement.
      The grain itself stays, since it is texture rather than motion. */
   .motes { display: none; }
-  .home-page::after, .story-page::after { animation: none; }
+  .home-page::after { animation: none; }
   .journal-track { animation: none; }
   .reveal { transition-delay: 0ms !important; }
   /* The flip becomes a plain swap so the writing is still reachable. */
   .journal-card-inner { transition: none; }
+}
+
+
+/* The postcard lightbox: the full set of photographs for one place, plus the
+   note Yaren wrote about it. Opens over everything else, closes on Escape,
+   backdrop click, or the close button. */
+.postcard-lightbox { position: fixed; z-index: 200; inset: 0; display: grid; place-items: center; padding: 5vh 4vw; }
+.postcard-lightbox[hidden] { display: none; }
+.postcard-lightbox-backdrop { position: absolute; inset: 0; background: rgba(15, 20, 15, .82); backdrop-filter: blur(3px); }
+.postcard-lightbox-inner { position: relative; z-index: 1; display: grid; grid-template-columns: minmax(0, 1.3fr) minmax(280px, .8fr); width: min(1080px, 100%); max-height: 88vh; overflow: hidden; background: var(--paper); box-shadow: var(--shadow-lift); }
+.postcard-lightbox-close { position: absolute; top: 14px; right: 14px; z-index: 2; width: 38px; height: 38px; border: 1px solid rgba(241,234,220,.5); border-radius: 50%; background: rgba(20,26,20,.4); color: var(--cream); font-size: 15px; }
+.postcard-lightbox-media { position: relative; display: grid; place-items: center; background: var(--green-deep); overflow: hidden; }
+.postcard-lightbox-media img { display: block; width: 100%; height: 100%; max-height: 88vh; object-fit: cover; }
+.postcard-lightbox-nav { position: absolute; top: 50%; display: grid; place-items: center; width: 42px; height: 42px; border: 1px solid rgba(241,234,220,.45); border-radius: 50%; transform: translateY(-50%); background: rgba(20,26,20,.4); color: var(--cream); }
+.postcard-lightbox-nav.prev { left: 16px; }
+.postcard-lightbox-nav.next { right: 16px; }
+.postcard-lightbox-nav[hidden] { display: none; }
+.postcard-lightbox-count { position: absolute; right: 16px; bottom: 14px; padding: 5px 10px; border-radius: 999px; background: rgba(20,26,20,.55); color: var(--cream); font: 500 10px/1 var(--mono); letter-spacing: .1em; }
+.postcard-lightbox-text { display: flex; flex-direction: column; justify-content: center; gap: 14px; padding: 46px 40px; overflow-y: auto; color: var(--coffee); }
+.postcard-lightbox-meta { margin: 0; color: var(--amber); font-family: var(--mono); font-size: 10px; letter-spacing: .17em; text-transform: uppercase; }
+.postcard-lightbox-text h3 { margin: 0; font: 400 clamp(30px, 3.2vw, 44px)/1.05 var(--serif); }
+.postcard-lightbox-note { margin: 0; color: #4a382a; font: italic 16px/1.6 var(--serif); white-space: pre-line; }
+
+@media (max-width: 760px) {
+  .postcard-lightbox { padding: 0; }
+  .postcard-lightbox-inner { grid-template-columns: 1fr; max-height: 100vh; height: 100%; overflow-y: auto; }
+  .postcard-lightbox-media img { max-height: 62vh; }
+  .postcard-lightbox-text { padding: 28px 24px 40px; }
+  .polaroid--secondary { width: min(140px, 34vw); left: -8%; bottom: -8%; }
 }
