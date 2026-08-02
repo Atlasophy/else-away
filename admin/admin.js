@@ -8,6 +8,8 @@ const publishButton = document.querySelector('[data-publish]');
 const picker = document.querySelector('[data-picker]');
 const pickerGrid = document.querySelector('[data-picker-grid]');
 const pickerDialog = picker.querySelector('[role="dialog"]');
+const uploadInput = document.querySelector('[data-upload-input]');
+const reconnectButton = document.querySelector('[data-reconnect]');
 
 const state = { content: null, view: 'postcards', dirty: false, readOnly: false, images: [], problems: [] };
 
@@ -25,6 +27,12 @@ function markDirty() {
   if (!state.readOnly) setStatus('Unpublished changes');
 }
 
+function setConnected(connected) {
+  uploadInput.disabled = !connected;
+  uploadInput.closest('.upload').classList.toggle('is-disabled', !connected);
+  reconnectButton.hidden = connected;
+}
+
 /* ---------------------------------------------------------------- loading */
 
 async function load() {
@@ -32,6 +40,7 @@ async function load() {
     const response = await fetch('/api/admin/content', { headers: { Accept: 'application/json' } });
     if (!response.ok) throw new Error(String(response.status));
     state.content = await response.json();
+    setConnected(true);
     setStatus('Up to date', 'saved');
   } catch {
     // No backend reachable — most likely running the site locally. Show the
@@ -39,7 +48,8 @@ async function load() {
     const module = await import('../content.js').catch(() => null);
     state.content = module ? window.ELSE_AWAY : { site: {}, postcards: [] };
     state.readOnly = true;
-    setStatus('Preview only — not connected, nothing can be saved', 'error');
+    setConnected(false);
+    setStatus('Session expired — reload the Studio to reconnect', 'error');
   }
   publishButton.disabled = true;
   render();
@@ -223,6 +233,8 @@ function closePicker(restoreFocus = true) {
   pickerLastFocused = null;
 }
 
+reconnectButton.addEventListener('click', () => location.reload());
+
 async function openPicker(target) {
   pickerTarget = target;
   if (picker.hidden) {
@@ -274,30 +286,79 @@ pickerGrid.addEventListener('click', event => {
 });
 
 /* Resizing here rather than on the server keeps a 12MB camera original off the
-   network entirely, and means no image library has to run at the edge. */
-async function prepare(file, maxEdge = 2000) {
-  const bitmap = await createImageBitmap(file);
-  const scale = Math.min(1, maxEdge / Math.max(bitmap.width, bitmap.height));
-  const width = Math.round(bitmap.width * scale);
-  const height = Math.round(bitmap.height * scale);
-  const canvas = new OffscreenCanvas(width, height);
-  canvas.getContext('2d').drawImage(bitmap, 0, 0, width, height);
-  bitmap.close();
-  const blob = await canvas.convertToBlob({ type: 'image/webp', quality: 0.86 });
-  return { blob, width, height };
+   network entirely, and means no image library has to run at the edge. The
+   fallbacks keep this working in Safari versions without OffscreenCanvas. */
+async function decodeImage(file) {
+  if (typeof createImageBitmap === 'function') {
+    try {
+      const bitmap = await createImageBitmap(file);
+      return { source: bitmap, width: bitmap.width, height: bitmap.height, close: () => bitmap.close() };
+    } catch { /* Safari can reject formats that its regular image decoder supports. */ }
+  }
+
+  const url = URL.createObjectURL(file);
+  const image = new Image();
+  try {
+    await new Promise((resolve, reject) => {
+      image.onload = resolve;
+      image.onerror = () => reject(new Error('This photograph could not be opened.'));
+      image.src = url;
+    });
+    return {
+      source: image,
+      width: image.naturalWidth,
+      height: image.naturalHeight,
+      close: () => URL.revokeObjectURL(url),
+    };
+  } catch (error) {
+    URL.revokeObjectURL(url);
+    throw error;
+  }
 }
 
-document.querySelector('[data-upload-input]').addEventListener('change', async event => {
+function canvasBlob(canvas) {
+  if (typeof canvas.convertToBlob === 'function') {
+    return canvas.convertToBlob({ type: 'image/webp', quality: 0.86 });
+  }
+  return new Promise((resolve, reject) => canvas.toBlob(
+    blob => blob ? resolve(blob) : reject(new Error('This photograph could not be prepared.')),
+    'image/webp',
+    0.86,
+  ));
+}
+
+async function prepare(file, maxEdge = 2000) {
+  const image = await decodeImage(file);
+  try {
+    const scale = Math.min(1, maxEdge / Math.max(image.width, image.height));
+    const width = Math.round(image.width * scale);
+    const height = Math.round(image.height * scale);
+    const canvas = typeof OffscreenCanvas === 'function'
+      ? new OffscreenCanvas(width, height)
+      : Object.assign(document.createElement('canvas'), { width, height });
+    const context = canvas.getContext('2d');
+    if (!context) throw new Error('This browser could not prepare the photograph.');
+    context.drawImage(image.source, 0, 0, width, height);
+    const blob = await canvasBlob(canvas);
+    return { blob, width, height };
+  } finally {
+    image.close();
+  }
+}
+
+uploadInput.addEventListener('change', async event => {
   const files = [...event.target.files];
   if (!files.length) return;
-  if (state.readOnly) return setStatus('Not connected — photographs cannot be uploaded', 'error');
+  if (state.readOnly) return setStatus('Session expired — reload the Studio to upload', 'error');
 
   for (const [position, file] of files.entries()) {
     setStatus(`Sending ${position + 1} of ${files.length}…`);
     try {
       const { blob, width, height } = await prepare(file);
       const form = new FormData();
-      form.append('file', new File([blob], `${file.name.replace(/\.[^.]+$/, '')}.webp`, { type: 'image/webp' }));
+      const type = blob.type || 'image/webp';
+      const extension = type === 'image/png' ? 'png' : type === 'image/jpeg' ? 'jpg' : 'webp';
+      form.append('file', new File([blob], `${file.name.replace(/\.[^.]+$/, '')}.${extension}`, { type }));
       form.append('name', file.name);
       form.append('width', width);
       form.append('height', height);

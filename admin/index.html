@@ -7,8 +7,8 @@
   <title>Else Away — Studio</title>
   <link rel="icon" href="../assets/favicon.svg" type="image/svg+xml">
   <!-- Bump this asset version whenever Studio CSS or JavaScript changes. -->
-  <link rel="stylesheet" href="/admin/admin.css?v=20260803.1">
-  <script src="/admin/admin.js?v=20260803.1" type="module" defer></script>
+  <link rel="stylesheet" href="/admin/admin.css?v=20260803.2">
+  <script src="/admin/admin.js?v=20260803.2" type="module" defer></script>
 </head>
 <body>
   <a class="skip-link" href="#workspace">Skip to the editor</a>
@@ -38,9 +38,11 @@
       </div>
       <label class="upload">
         <input type="file" accept="image/*" multiple data-upload-input>
-        <span>Upload from your computer</span>
-        <small>Large photographs are resized before they are sent, so this works on any connection.</small>
+        <span class="upload-action" data-upload-action>Choose &amp; upload photographs</span>
+        <span class="upload-title">From your computer</span>
+        <small>Upload starts automatically after you choose. Large photographs are resized before they are sent.</small>
       </label>
+      <button type="button" class="reconnect" data-reconnect hidden>Reload Studio to reconnect</button>
       <div class="picker-grid" data-picker-grid></div>
     </div>
   </div>
