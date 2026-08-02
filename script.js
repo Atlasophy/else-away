@@ -177,22 +177,29 @@ if (journalRail && journalTrack) {
   journalRail.addEventListener('pointerdown', event => {
     programmaticScroll = false;
     if (event.pointerType !== 'mouse' || event.button !== 0) return;
-    dragState = { id: event.pointerId, x: event.clientX, left: journalRail.scrollLeft, moved: false };
-    journalRail.setPointerCapture(event.pointerId);
-    journalRail.classList.add('is-dragging');
+    dragState = { id: event.pointerId, x: event.clientX, left: journalRail.scrollLeft, moved: false, captured: false };
   });
   journalRail.addEventListener('pointermove', event => {
     if (!dragState || dragState.id !== event.pointerId) return;
     const distance = event.clientX - dragState.x;
-    if (Math.abs(distance) > 5) dragState.moved = true;
-    if (dragState.moved) journalRail.scrollLeft = dragState.left - distance;
+    if (Math.abs(distance) > 5 && !dragState.moved) {
+      dragState.moved = true;
+      dragState.captured = true;
+      journalRail.setPointerCapture(event.pointerId);
+      journalRail.classList.add('is-dragging');
+    }
+    if (dragState.moved) {
+      event.preventDefault();
+      journalRail.scrollLeft = dragState.left - distance;
+    }
   });
   const finishDrag = event => {
     if (!dragState || dragState.id !== event.pointerId) return;
     suppressPostcardClick = dragState.moved;
+    const captured = dragState.captured;
     dragState = null;
     journalRail.classList.remove('is-dragging');
-    if (journalRail.hasPointerCapture(event.pointerId)) journalRail.releasePointerCapture(event.pointerId);
+    if (captured && journalRail.hasPointerCapture(event.pointerId)) journalRail.releasePointerCapture(event.pointerId);
     if (suppressPostcardClick) setTimeout(() => { suppressPostcardClick = false; }, 0);
   };
   journalRail.addEventListener('pointerup', finishDrag);
@@ -273,6 +280,13 @@ if (lightbox && postcards.length) {
     if (clickedPostcard) {
       openLightbox(Number(clickedPostcard.dataset.postcardOpen), clickedPostcard);
     }
+  });
+  journalSet?.addEventListener('keydown', event => {
+    if (event.repeat || !['Enter', ' '].includes(event.key)) return;
+    const trigger = event.target.closest('[data-postcard-open]');
+    if (!trigger) return;
+    event.preventDefault();
+    openLightbox(Number(trigger.dataset.postcardOpen), trigger);
   });
   lightbox.querySelectorAll('[data-postcard-lightbox-close]').forEach(el => el.addEventListener('click', closeLightbox));
   prevButton.addEventListener('click', () => step(-1));
