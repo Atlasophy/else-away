@@ -90,6 +90,31 @@ if (journalTrack && journalSet && postcards.length) {
   journalTrack.appendChild(journalClone);
 }
 
+/* Freeze the drifting rail as soon as a pointer goes down. Without this, a
+   card can slide out from under a tap before pointer-up, causing the adjacent
+   postcard to receive the click. Remembering the pressed card also makes the
+   interaction deterministic on touch devices that do not have hover. */
+let pressedPostcard = null;
+let journalResumeTimer = null;
+if (journalTrack) {
+  journalTrack.addEventListener('pointerdown', event => {
+    pressedPostcard = event.target.closest('[data-postcard-open]');
+    if (!pressedPostcard) return;
+    clearTimeout(journalResumeTimer);
+    journalTrack.classList.add('is-pointer-paused');
+  }, { passive: true });
+  journalTrack.addEventListener('pointerup', () => {
+    journalResumeTimer = setTimeout(() => {
+      pressedPostcard = null;
+      journalTrack.classList.remove('is-pointer-paused');
+    }, 900);
+  }, { passive: true });
+  journalTrack.addEventListener('pointercancel', () => {
+    pressedPostcard = null;
+    journalResumeTimer = setTimeout(() => journalTrack.classList.remove('is-pointer-paused'), 900);
+  }, { passive: true });
+}
+
 /* ------------------------------------------------------- postcard lightbox */
 const lightbox = document.querySelector('[data-postcard-lightbox]');
 if (lightbox && postcards.length) {
@@ -152,8 +177,14 @@ if (lightbox && postcards.length) {
   }
 
   document.addEventListener('click', event => {
-    const trigger = event.target.closest('[data-postcard-open]');
-    if (trigger) openLightbox(Number(trigger.dataset.postcardOpen), trigger);
+    const clickedPostcard = event.target.closest('[data-postcard-open]');
+    const trigger = journalTrack?.contains(event.target) && pressedPostcard
+      ? pressedPostcard
+      : clickedPostcard;
+    if (trigger) {
+      pressedPostcard = null;
+      openLightbox(Number(trigger.dataset.postcardOpen), trigger);
+    }
   });
   lightbox.querySelectorAll('[data-postcard-lightbox-close]').forEach(el => el.addEventListener('click', closeLightbox));
   prevButton.addEventListener('click', () => step(-1));

@@ -157,6 +157,7 @@ h1 em, h2 em { font-weight: 400; }
 /* Postcards turn over. Engaging with the rail stops its drift first, so the
    card being read holds still. */
 .journal-rail:hover .journal-track, .journal-rail:focus-within .journal-track { animation-play-state: paused; }
+.journal-track.is-pointer-paused { animation-play-state: paused; }
 .journal-card { flex: 0 0 clamp(250px, 21vw, 330px); color: var(--cream); perspective: 1200px; }
 .journal-card-inner { position: relative; transform-style: preserve-3d; transition: transform .85s cubic-bezier(.3,.7,.25,1); }
 .journal-card:hover .journal-card-inner, .journal-card:focus-within .journal-card-inner { transform: rotateY(180deg); }
