@@ -204,4 +204,17 @@ mobileMenu.querySelectorAll('a').forEach(link => link.addEventListener('click', 
 }));
 
 document.querySelector('[data-year]').textContent = new Date().getFullYear();
-requestAnimationFrame(() => document.body.classList.add('page-ready'));
+
+/* The wipe transitions off-screen via transform, but a stale paint layer can
+   occasionally leave it visually stuck even once the transform is correct.
+   Once it has finished sliding away, drop it out of the render tree
+   entirely so there is nothing left for a bad paint to hold onto. */
+const pageWipe = document.querySelector('.page-wipe');
+const hideWipe = () => { if (pageWipe) pageWipe.style.display = 'none'; };
+if (pageWipe) pageWipe.addEventListener('transitionend', hideWipe, { once: true });
+requestAnimationFrame(() => {
+  requestAnimationFrame(() => {
+    document.body.classList.add('page-ready');
+    setTimeout(hideWipe, 1200);
+  });
+});
