@@ -119,16 +119,17 @@ h1 em, h2 em { font-weight: 400; }
 /* A physical print, tilted as if set down on a table. The caption sits in the
    white margin below the image rather than over it. */
 .about-collage { position: relative; display: grid; place-items: center; transform: translate3d(0, var(--parallax-shift, 0px), 0); will-change: transform; }
-/* A second print, smaller and turned the other way, tucked into the corner
-   as if it had been set down on top of the first. */
-.polaroid--secondary { position: absolute; z-index: 3; left: -16%; bottom: -10%; width: min(180px, 16vw); padding: 11px 11px 15px; transform: rotate(8deg); }
-.polaroid--secondary:hover { transform: rotate(10deg) translateY(-4px); }
-.polaroid--secondary img { width: 100%; }
 .polaroid { margin: 0; padding: 16px 16px 74px; background: #f6f1ea; box-shadow: 0 34px 80px rgba(0,0,0,.42), 0 6px 18px rgba(0,0,0,.26); transform: rotate(-3.5deg); transition: transform .6s cubic-bezier(.2,.65,.25,1); }
 .polaroid:hover { transform: rotate(-1.2deg) translateY(-6px); }
 /* Shown at the photograph's own proportions. No crop, no grade. */
 .polaroid img { display: block; width: min(340px, 30vw); height: auto; }
 .polaroid figcaption { margin-top: 26px; text-align: center; color: var(--coffee); font: italic 21px/1 var(--serif); }
+/* A second print, smaller and turned the other way, tucked into the corner
+   as if it had been set down on top of the first. The combined selector keeps
+   the primary print's image and padding rules from overriding this variant. */
+.polaroid.polaroid--secondary { position: absolute; z-index: 3; left: -16%; bottom: -10%; width: clamp(116px, 16vw, 180px); padding: 11px 11px 15px; transform: rotate(8deg); }
+.polaroid.polaroid--secondary:hover { transform: rotate(10deg) translateY(-4px); }
+.polaroid.polaroid--secondary img { width: 100%; }
 .about .eyebrow { color: #b7bd9e; }
 .about h2 { margin-bottom: 45px; font-size: clamp(50px, 6vw, 86px); }
 .about-copy > p:not(.eyebrow) { max-width: 550px; color: rgba(241,234,220,.86); font: 17px/1.65 var(--serif); }
@@ -235,6 +236,7 @@ footer div { display: flex; gap: 25px; font-size: 9px; letter-spacing: .12em; te
   .journal-title-row { align-items: start; flex-direction: column; gap: 30px; }
   .about { grid-template-columns: 1fr; gap: 80px; padding-bottom: 135px; }
   .polaroid img { width: min(320px, 62vw); }
+  .polaroid.polaroid--secondary { left: 4%; bottom: -8%; }
   .about-copy { max-width: 650px; }
   .journal-heading { padding-top: 95px; padding-bottom: 35px; }
   .journal-rail { padding-bottom: 75px; }
