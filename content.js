@@ -12,43 +12,43 @@ window.ELSE_AWAY = window.ELSE_AWAY || {
   "postcards": [
     {
       "city": "Menorca",
-      "country": "",
-      "time": "",
+      "country": "Spain",
+      "time": "After midnight",
       "note": "The table they set after everyone else had gone home",
       "images": ["assets/stories/summer-5.webp"]
     },
     {
       "city": "Tatras",
       "country": "",
-      "time": "",
+      "time": "Night train",
       "note": "Waking up at the last station before the mountains",
       "images": ["assets/stories/autumn-5.webp"]
     },
     {
       "city": "Salzburg",
-      "country": "",
-      "time": "",
+      "country": "Austria",
+      "time": "05:12",
       "note": "Inside the bakery before the first tram passed",
       "images": ["assets/stories/autumn-4.webp"]
     },
     {
-      "city": "Iceland",
-      "country": "",
-      "time": "",
+      "city": "",
+      "country": "Iceland",
+      "time": "Below zero",
       "note": "A winter bath where the road quietly disappears",
       "images": ["assets/stories/winter-3.webp"]
     },
     {
       "city": "Provence",
-      "country": "",
-      "time": "",
+      "country": "France",
+      "time": "Wild clay",
       "note": "Learning why this village never paints its pottery",
       "images": ["assets/stories/spring-3.webp"]
     },
     {
-      "city": "Austria",
-      "country": "",
-      "time": "",
+      "city": "",
+      "country": "Austria",
+      "time": "No road in",
       "note": "Three days in the orchard cabin reached only on foot",
       "images": ["assets/stories/spring-2.webp"]
     }

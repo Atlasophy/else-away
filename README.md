@@ -28,8 +28,9 @@ npx serve .
 - Homepage interactions, including the postcard lightbox: `script.js`
 - Images and favicon: `assets/`
 
-Once the studio is live (below), `content.js` is generated from the database and
-Yaren edits everything through `/admin` instead.
+In production, `/api/content-script` loads the published database content before
+`content.js`; the committed file remains an offline fallback. Yaren edits the
+live content through `/admin`.
 
 ## The studio
 
@@ -46,18 +47,20 @@ network.
 
 ## Deploying
 
-The site currently runs on GitHub Pages, which serves static files only and so
-cannot host the studio. Moving to Cloudflare Pages adds the database, the photo
-storage, and the sign-in — and stays free at this scale.
+The site runs on Cloudflare Pages. The Pages project is connected to this
+repository, and every push to `main` deploys automatically. Content publishing
+inside the studio does not require a code deploy: it writes directly to D1 and
+appears publicly after the one-minute content cache expires.
 
 R2 is the reason for choosing Cloudflare: it charges nothing for bandwidth, and
 a photography portfolio is almost entirely bandwidth.
 
-These steps need an account, so they are yours to run rather than Claude's.
+The manual setup steps below are only needed when rebuilding the Cloudflare
+project from scratch.
 
 1. **Create a Cloudflare account** and add `elseaway.com` to it. Cloudflare will
-   give you two nameservers to set at your domain registrar. Until that
-   propagates the site stays on GitHub Pages, so there is no rush between steps.
+   give you two nameservers to set at your domain registrar. Keep the existing
+   DNS records in place while the nameserver change propagates.
 
 2. **Install the CLI and sign in.**
    ```bash
@@ -92,8 +95,8 @@ These steps need an account, so they are yours to run rather than Claude's.
    `*.pages.dev` hostname, which an Access policy on the custom domain does not
    cover.
 
-7. **Point the domain at Pages** in Workers & Pages → Custom domains, and remove
-   the GitHub Pages custom domain so the two do not compete.
+7. **Point the domain at Pages** in Workers & Pages → Custom domains, then
+   connect the GitHub repository and set `main` as the production branch.
 
 Regenerate `seed.sql` from `content.js` at any time with:
 

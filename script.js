@@ -1,6 +1,31 @@
-const content = window.ELSE_AWAY;
+const content = window.ELSE_AWAY ?? { site: {}, postcards: [] };
+const site = content.site ?? {};
 
 const reduceMotion = window.matchMedia('(prefers-reduced-motion: reduce)');
+
+/* ----------------------------------------------------------- site details */
+/* These values are editable in the studio. Keep safe committed defaults in
+   the HTML, then replace them only when the published value is usable. */
+const defaultEmail = 'yarenkecici022@gmail.com';
+const email = /^[^\s@]+@[^\s@]+\.[^\s@]+$/.test(String(site.email ?? '').trim())
+  ? String(site.email).trim()
+  : defaultEmail;
+const emailSubject = String(site.emailSubject ?? 'A place worth remembering').trim();
+const mailto = `mailto:${email}${emailSubject ? `?subject=${encodeURIComponent(emailSubject)}` : ''}`;
+
+document.querySelectorAll('[data-email-link]').forEach(link => { link.href = mailto; });
+document.querySelectorAll('[data-email-label]').forEach(link => {
+  const text = link.firstChild;
+  if (text?.nodeType === Node.TEXT_NODE) text.textContent = `${email} `;
+});
+
+const instagram = String(site.instagram ?? '').trim();
+if (/^https:\/\//i.test(instagram)) {
+  document.querySelectorAll('[data-instagram-link]').forEach(link => { link.href = instagram; });
+}
+document.querySelectorAll('[data-credit]').forEach(element => {
+  element.textContent = String(site.credit ?? '').trim() || 'By Atlasophy';
+});
 
 /* ------------------------------------------------------------- postcards */
 /* Each postcard is a small place: a city, a country, roughly when it was,
@@ -13,29 +38,47 @@ const metaLabel = card => {
   const bits = [card.time, count ? `${count} photograph${count === 1 ? '' : 's'}` : null].filter(Boolean);
   return bits.join(' · ');
 };
+const escapeHTML = value => String(value ?? '').replace(/[&<>"']/g, character => ({
+  '&': '&amp;', '<': '&lt;', '>': '&gt;', '"': '&quot;', "'": '&#39;'
+}[character]));
+const safeImageUrl = value => {
+  const candidate = String(value ?? '').trim();
+  if (!candidate) return '';
+  try {
+    const url = new URL(candidate, document.baseURI);
+    return ['http:', 'https:'].includes(url.protocol) ? url.href : '';
+  } catch {
+    return '';
+  }
+};
 
 const journalSet = document.querySelector('[data-journal-set]');
 const postcards = content.postcards ?? [];
 
 if (journalSet) {
-  journalSet.innerHTML = postcards.map((card, index) => `
+  journalSet.innerHTML = postcards.length ? postcards.map((card, index) => `
     <article class="journal-card">
-      <button type="button" class="journal-card-link" data-postcard-open="${index}" aria-haspopup="dialog">
+      <button type="button" class="journal-card-link" data-postcard-open="${index}" aria-haspopup="dialog" aria-label="${escapeHTML(`Open postcard from ${placeLabel(card)}${metaLabel(card) ? `, ${metaLabel(card)}` : ''}`)}">
         <div class="journal-card-inner">
           <div class="journal-front">
-            <div class="journal-image" style="--journal-image:url('${(card.images ?? [])[0] ?? ''}')" aria-hidden="true"></div>
-            <p class="post-meta">${metaLabel(card)}</p>
-            <h3>${placeLabel(card)}</h3>
+            <div class="journal-image" data-postcard-cover="${index}" aria-hidden="true"></div>
+            <p class="post-meta">${escapeHTML(metaLabel(card))}</p>
+            <h3>${escapeHTML(placeLabel(card))}</h3>
             <span class="journal-cta">View photographs <span aria-hidden="true">→</span></span>
           </div>
           <div class="journal-back">
-            <span class="journal-postmark" aria-hidden="true">${card.country || card.city || ''}${card.time ? `<br>${card.time}` : ''}</span>
-            <p class="journal-note">${card.note ?? ''}</p>
+            <span class="journal-postmark" aria-hidden="true">${escapeHTML(card.country || card.city || '')}${card.time ? `<br>${escapeHTML(card.time)}` : ''}</span>
+            <p class="journal-note">${escapeHTML(card.note)}</p>
             <span class="journal-cta">View photographs <span aria-hidden="true">→</span></span>
           </div>
         </div>
       </button>
-    </article>`).join('');
+    </article>`).join('') : '<p class="journal-empty">New postcards are on the way.</p>';
+  journalSet.querySelectorAll('[data-postcard-cover]').forEach(cover => {
+    const card = postcards[Number(cover.dataset.postcardCover)];
+    const url = safeImageUrl(card?.images?.[0]);
+    if (url) cover.style.setProperty('--journal-image', `url("${url}")`);
+  });
 }
 
 const journalTrack = document.querySelector('[data-journal-track]');
@@ -60,10 +103,14 @@ if (lightbox && postcards.length) {
   let openCard = null;
   let openPhoto = 0;
   let lastFocused = null;
+  const headerRegion = document.querySelector('[data-header]');
+  const backgroundRegions = [...document.querySelectorAll('main > :not([data-postcard-lightbox])')];
 
   function renderPhoto() {
     const photos = openCard.images ?? [];
-    image.src = photos[openPhoto] ?? '';
+    const photoUrl = safeImageUrl(photos[openPhoto]);
+    if (photoUrl) image.src = photoUrl;
+    else image.removeAttribute('src');
     image.alt = `${placeLabel(openCard)} — photograph ${openPhoto + 1} of ${photos.length}`;
     countLabel.textContent = photos.length > 1 ? `${openPhoto + 1} / ${photos.length}` : '';
     const multiple = photos.length > 1;
@@ -82,12 +129,16 @@ if (lightbox && postcards.length) {
     renderPhoto();
     lightbox.hidden = false;
     document.body.style.overflow = 'hidden';
+    backgroundRegions.forEach(region => { region.inert = true; });
+    headerRegion.inert = true;
     lightbox.querySelector('.postcard-lightbox-close').focus();
   }
 
   function closeLightbox() {
     lightbox.hidden = true;
     document.body.style.overflow = '';
+    backgroundRegions.forEach(region => { region.inert = false; });
+    headerRegion.inert = false;
     openCard = null;
     lastFocused?.focus();
   }
@@ -112,6 +163,18 @@ if (lightbox && postcards.length) {
     if (event.key === 'Escape') closeLightbox();
     if (event.key === 'ArrowLeft') step(-1);
     if (event.key === 'ArrowRight') step(1);
+    if (event.key === 'Tab') {
+      const controls = [...lightbox.querySelectorAll('button:not([hidden])')];
+      const first = controls[0];
+      const last = controls[controls.length - 1];
+      if (event.shiftKey && document.activeElement === first) {
+        event.preventDefault();
+        last.focus();
+      } else if (!event.shiftKey && document.activeElement === last) {
+        event.preventDefault();
+        first.focus();
+      }
+    }
   });
 }
 
@@ -183,25 +246,39 @@ updateScrollEffects();
 
 const menuToggle = document.querySelector('[data-menu-toggle]');
 const mobileMenu = document.querySelector('[data-mobile-menu]');
+const main = document.querySelector('main');
+
+function setMenuOpen(open, returnFocus = false) {
+  menuToggle.setAttribute('aria-expanded', String(open));
+  menuToggle.setAttribute('aria-label', open ? 'Close menu' : 'Open menu');
+  mobileMenu.classList.toggle('open', open);
+  header.classList.toggle('menu-open', open);
+  document.body.style.overflow = open ? 'hidden' : '';
+  main.inert = open;
+  if (open) mobileMenu.querySelector('a')?.focus();
+  else if (returnFocus) menuToggle.focus();
+}
+
 menuToggle.addEventListener('click', () => {
-  const open = menuToggle.getAttribute('aria-expanded') === 'true';
-  menuToggle.setAttribute('aria-expanded', String(!open));
-  menuToggle.setAttribute('aria-label', open ? 'Open menu' : 'Close menu');
-  mobileMenu.classList.toggle('open', !open);
-  header.classList.toggle('menu-open', !open);
-  document.body.style.overflow = open ? '' : 'hidden';
+  setMenuOpen(menuToggle.getAttribute('aria-expanded') !== 'true');
 });
 mobileMenu.querySelectorAll('a').forEach(link => link.addEventListener('click', event => {
   const href = link.getAttribute('href');
   const target = href.startsWith('#') ? document.querySelector(href) : null;
   if (target) event.preventDefault();
-  menuToggle.setAttribute('aria-expanded', 'false');
-  menuToggle.setAttribute('aria-label', 'Open menu');
-  mobileMenu.classList.remove('open');
-  header.classList.remove('menu-open');
-  document.body.style.overflow = '';
-  if (target) setTimeout(() => target.scrollIntoView({ behavior: 'smooth' }), 40);
+  setMenuOpen(false);
+  if (target) {
+    target.tabIndex = -1;
+    target.focus({ preventScroll: true });
+    target.addEventListener('blur', () => target.removeAttribute('tabindex'), { once: true });
+    setTimeout(() => target.scrollIntoView({ behavior: 'smooth' }), 40);
+  }
 }));
+document.addEventListener('keydown', event => {
+  if (event.key === 'Escape' && menuToggle.getAttribute('aria-expanded') === 'true') {
+    setMenuOpen(false, true);
+  }
+});
 
 document.querySelector('[data-year]').textContent = new Date().getFullYear();
 

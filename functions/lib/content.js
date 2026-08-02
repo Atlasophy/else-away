@@ -33,12 +33,36 @@ export async function readContent(db) {
 export function validateContent(payload) {
   const errors = [];
   if (!payload || typeof payload !== 'object') return ['Payload must be an object.'];
-  if (!Array.isArray(payload.postcards)) errors.push('Postcards must be a list.');
+  if (!payload.site || typeof payload.site !== 'object' || Array.isArray(payload.site)) {
+    errors.push('Site details must be an object.');
+  }
+  if (!Array.isArray(payload.postcards)) return [...errors, 'Postcards must be a list.'];
 
-  for (const card of payload.postcards ?? []) {
-    const label = [card.city, card.country].filter(Boolean).join(', ') || 'A postcard';
-    if (!card.city && !card.country) errors.push(`${label} needs at least a city or a country.`);
+  for (const [index, card] of payload.postcards.entries()) {
+    if (!card || typeof card !== 'object' || Array.isArray(card)) {
+      errors.push(`Postcard ${index + 1} must be an object.`);
+      continue;
+    }
+    const city = typeof card.city === 'string' ? card.city.trim() : '';
+    const country = typeof card.country === 'string' ? card.country.trim() : '';
+    const label = [city, country].filter(Boolean).join(', ') || `Postcard ${index + 1}`;
+    if (!city && !country) errors.push(`${label} needs at least a city or a country.`);
     if (!Array.isArray(card.images) || card.images.length === 0) errors.push(`"${label}" has no photograph.`);
+    if (Array.isArray(card.images) && card.images.some(image => typeof image !== 'string' || !/^(?:https:\/\/|\/|assets\/)/i.test(image))) {
+      errors.push(`"${label}" has an invalid photograph address.`);
+    }
+    for (const [field, limit] of [['city', 120], ['country', 120], ['time', 120], ['note', 5000]]) {
+      if (card[field] != null && typeof card[field] !== 'string') errors.push(`"${label}" has an invalid ${field} value.`);
+      if (typeof card[field] === 'string' && card[field].length > limit) errors.push(`"${label}" has a ${field} value that is too long.`);
+    }
+  }
+
+  const details = payload.site ?? {};
+  if (details.email && !/^[^\s@]+@[^\s@]+\.[^\s@]+$/.test(String(details.email).trim())) {
+    errors.push('The contact email address is not valid.');
+  }
+  if (details.instagram && !/^https:\/\//i.test(String(details.instagram).trim())) {
+    errors.push('The Instagram link must start with https://.');
   }
   return errors;
 }

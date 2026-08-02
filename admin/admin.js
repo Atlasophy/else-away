@@ -7,6 +7,7 @@ const statusLine = document.querySelector('[data-status]');
 const publishButton = document.querySelector('[data-publish]');
 const picker = document.querySelector('[data-picker]');
 const pickerGrid = document.querySelector('[data-picker-grid]');
+const pickerDialog = picker.querySelector('[role="dialog"]');
 
 const state = { content: null, view: 'postcards', dirty: false, readOnly: false, images: [], problems: [] };
 
@@ -212,10 +213,25 @@ workspace.addEventListener('click', event => {
 /* --------------------------------------------------------- the photographs */
 
 let pickerTarget = null;
+let pickerLastFocused = null;
+
+function closePicker(restoreFocus = true) {
+  picker.hidden = true;
+  document.querySelector('.bar').inert = false;
+  workspace.inert = false;
+  if (restoreFocus) pickerLastFocused?.focus();
+  pickerLastFocused = null;
+}
 
 async function openPicker(target) {
   pickerTarget = target;
-  picker.hidden = false;
+  if (picker.hidden) {
+    pickerLastFocused = document.activeElement;
+    picker.hidden = false;
+    document.querySelector('.bar').inert = true;
+    workspace.inert = true;
+    document.querySelector('[data-picker-close]').focus();
+  }
   pickerGrid.innerHTML = '<p class="picker-empty">Looking…</p>';
   await loadImages();
   pickerGrid.innerHTML = state.images.length
@@ -223,9 +239,24 @@ async function openPicker(target) {
     : '<p class="picker-empty">Nothing uploaded yet. Add a photograph above.</p>';
 }
 
-document.querySelector('[data-picker-close]').addEventListener('click', () => { picker.hidden = true; });
-picker.addEventListener('click', event => { if (event.target === picker) picker.hidden = true; });
-document.addEventListener('keydown', event => { if (event.key === 'Escape' && !picker.hidden) picker.hidden = true; });
+document.querySelector('[data-picker-close]').addEventListener('click', closePicker);
+picker.addEventListener('click', event => { if (event.target === picker) closePicker(); });
+document.addEventListener('keydown', event => {
+  if (picker.hidden) return;
+  if (event.key === 'Escape') closePicker();
+  if (event.key === 'Tab') {
+    const controls = [...pickerDialog.querySelectorAll('button:not([hidden]), input:not([hidden])')];
+    const first = controls[0];
+    const last = controls[controls.length - 1];
+    if (event.shiftKey && document.activeElement === first) {
+      event.preventDefault();
+      last.focus();
+    } else if (!event.shiftKey && document.activeElement === last) {
+      event.preventDefault();
+      first.focus();
+    }
+  }
+});
 
 /* Picking a photograph for a postcard adds it to that card's gallery rather
    than replacing anything, since a postcard can hold as many as Yaren likes. */
@@ -235,9 +266,11 @@ pickerGrid.addEventListener('click', event => {
   const [kind, a] = pickerTarget.split('.');
   const url = chosen.dataset.choose;
   if (kind === 'postcards') state.content.postcards[Number(a)].images.push(url);
-  picker.hidden = true;
+  const focusTarget = pickerTarget;
+  closePicker(false);
   markDirty();
   render();
+  workspace.querySelector(`[data-pick="${focusTarget}"]`)?.focus();
 });
 
 /* Resizing here rather than on the server keeps a 12MB camera original off the

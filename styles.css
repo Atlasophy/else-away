@@ -153,6 +153,7 @@ h1 em, h2 em { font-weight: 400; }
 .journal-rail::after { right: 0; background: linear-gradient(-90deg, #102d22, transparent); }
 .journal-track { display: flex; width: max-content; gap: 22px; will-change: transform; animation: journalDrift 76s linear infinite; }
 .journal-set { display: flex; flex: none; gap: 22px; padding-left: 22px; }
+.journal-empty { margin: 0; padding: 34px 8.5vw 70px; color: rgba(241,234,220,.72); font: italic 22px/1.5 var(--serif); }
 /* Postcards turn over. Engaging with the rail stops its drift first, so the
    card being read holds still. */
 .journal-rail:hover .journal-track, .journal-rail:focus-within .journal-track { animation-play-state: paused; }

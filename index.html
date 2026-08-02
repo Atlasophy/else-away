@@ -41,12 +41,12 @@
       <a href="#work-with-me">Work with me</a>
       <a href="#journal">Postcards</a>
     </nav>
-    <a class="header-cta" href="mailto:yarenkecici022@gmail.com">Start a story <span aria-hidden="true">↗</span></a>
-    <button class="menu-toggle" type="button" aria-label="Open menu" aria-expanded="false" data-menu-toggle>
+    <a class="header-cta" href="mailto:yarenkecici022@gmail.com" data-email-link>Start a story <span aria-hidden="true">↗</span></a>
+    <button class="menu-toggle" type="button" aria-label="Open menu" aria-expanded="false" aria-controls="mobile-menu" data-menu-toggle>
       <span></span><span></span>
     </button>
   </header>
-  <nav class="mobile-menu" aria-label="Mobile navigation" data-mobile-menu>
+  <nav class="mobile-menu" id="mobile-menu" aria-label="Mobile navigation" data-mobile-menu>
     <a href="#about">About me</a>
     <a href="#work-with-me">Work with me</a>
     <a href="#journal">Postcards</a>
@@ -140,7 +140,7 @@
             <p>Professional imagery for Airbnb, Booking.com, your website, and marketing materials.</p>
           </article>
         </div>
-        <a class="button-light reveal" href="mailto:yarenkecici022@gmail.com">Start a story <span>↗</span></a>
+        <a class="button-light reveal" href="mailto:yarenkecici022@gmail.com" data-email-link>Start a story <span>↗</span></a>
       </div>
     </section>
 
@@ -164,18 +164,18 @@
 
     <div class="postcard-lightbox" data-postcard-lightbox hidden>
       <div class="postcard-lightbox-backdrop" data-postcard-lightbox-close></div>
-      <div class="postcard-lightbox-inner" role="dialog" aria-modal="true" aria-label="Postcard">
+      <div class="postcard-lightbox-inner" role="dialog" aria-modal="true" aria-labelledby="postcard-lightbox-place" aria-describedby="postcard-lightbox-note">
         <button type="button" class="postcard-lightbox-close" data-postcard-lightbox-close aria-label="Close">✕</button>
         <div class="postcard-lightbox-media">
           <img data-postcard-lightbox-image src="" alt="">
           <button type="button" class="postcard-lightbox-nav prev" data-postcard-lightbox-prev aria-label="Previous photograph">←</button>
           <button type="button" class="postcard-lightbox-nav next" data-postcard-lightbox-next aria-label="Next photograph">→</button>
-          <span class="postcard-lightbox-count" data-postcard-lightbox-count></span>
+          <span class="postcard-lightbox-count" data-postcard-lightbox-count aria-live="polite"></span>
         </div>
         <div class="postcard-lightbox-text">
           <p class="postcard-lightbox-meta" data-postcard-lightbox-meta></p>
-          <h3 data-postcard-lightbox-place></h3>
-          <p class="postcard-lightbox-note" data-postcard-lightbox-note></p>
+          <h3 id="postcard-lightbox-place" data-postcard-lightbox-place></h3>
+          <p class="postcard-lightbox-note" id="postcard-lightbox-note" data-postcard-lightbox-note></p>
         </div>
       </div>
     </div>
@@ -185,13 +185,13 @@
         <p class="eyebrow light">Have a place worth remembering?</p>
         <h2 id="contact-title">Let’s tell its<br><em>story.</em></h2>
         <p>Available for stays, local businesses, tourism projects,<br class="desktop-only"> and beautifully unplanned adventures worldwide.</p>
-        <a class="button-light" href="mailto:yarenkecici022@gmail.com?subject=A%20place%20worth%20remembering">yarenkecici022@gmail.com <span>↗</span></a>
+        <a class="button-light" href="mailto:yarenkecici022@gmail.com?subject=A%20place%20worth%20remembering" data-email-link data-email-label>yarenkecici022@gmail.com <span>↗</span></a>
         <p class="closing-line">I don’t just photograph places. I photograph the feeling<br class="desktop-only"> that makes you want to stay a little longer.</p>
       </div>
       <footer>
         <a class="wordmark" href="#top"><span>Else Away</span><i>°</i></a>
-        <p>By Atlasophy</p>
-        <div><a href="https://www.instagram.com/saucerfulsecrets/" target="_blank" rel="noreferrer">Instagram</a><a href="mailto:yarenkecici022@gmail.com">Email</a><a href="#journal">Postcards</a></div>
+        <p data-credit>By Atlasophy</p>
+        <div><a href="https://www.instagram.com/saucerfulsecrets/" target="_blank" rel="noreferrer" data-instagram-link>Instagram</a><a href="mailto:yarenkecici022@gmail.com" data-email-link>Email</a><a href="#journal">Postcards</a></div>
         <p>© <span data-year></span> Else Away</p>
       </footer>
     </section>
