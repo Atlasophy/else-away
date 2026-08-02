@@ -57,7 +57,7 @@ const postcards = content.postcards ?? [];
 
 if (journalSet) {
   journalSet.innerHTML = postcards.length ? postcards.map((card, index) => `
-    <article class="journal-card">
+    <article class="journal-card" role="group" aria-roledescription="slide" aria-label="${escapeHTML(`${index + 1} of ${postcards.length}: ${placeLabel(card)}`)}">
       <button type="button" class="journal-card-link" data-postcard-open="${index}" aria-haspopup="dialog" aria-label="${escapeHTML(`Open postcard from ${placeLabel(card)}${metaLabel(card) ? `, ${metaLabel(card)}` : ''}`)}">
         <div class="journal-card-inner">
           <div class="journal-front">
@@ -82,37 +82,125 @@ if (journalSet) {
 }
 
 const journalTrack = document.querySelector('[data-journal-track]');
-if (journalTrack && journalSet && postcards.length) {
-  const journalClone = journalSet.cloneNode(true);
-  journalClone.removeAttribute('data-journal-set');
-  journalClone.setAttribute('aria-hidden', 'true');
-  journalClone.querySelectorAll('button').forEach(button => button.setAttribute('tabindex', '-1'));
-  journalTrack.appendChild(journalClone);
-}
+const journalRail = document.querySelector('.journal-rail');
+const journalPrev = document.querySelector('[data-journal-prev]');
+const journalNext = document.querySelector('[data-journal-next]');
+const journalCurrent = document.querySelector('[data-journal-current]');
+const journalTotal = document.querySelector('[data-journal-total]');
+const journalAnnouncement = document.querySelector('[data-journal-announcement]');
+const journalCards = journalSet ? [...journalSet.querySelectorAll('.journal-card')] : [];
 
-/* Freeze the drifting rail as soon as a pointer goes down. Without this, a
-   card can slide out from under a tap before pointer-up, causing the adjacent
-   postcard to receive the click. Remembering the pressed card also makes the
-   interaction deterministic on touch devices that do not have hover. */
-let pressedPostcard = null;
-let journalResumeTimer = null;
-if (journalTrack) {
-  journalTrack.addEventListener('pointerdown', event => {
-    pressedPostcard = event.target.closest('[data-postcard-open]');
-    if (!pressedPostcard) return;
-    clearTimeout(journalResumeTimer);
-    journalTrack.classList.add('is-pointer-paused');
+/* One stable horizontal rail replaces the duplicated drifting loop. Native
+   scrolling handles touch and trackpads; the controls, keyboard and mouse
+   drag all move the same scroll position and settle on the same card lanes. */
+if (journalRail && journalTrack) {
+  let journalIndex = 0;
+  let scrollFrame = 0;
+  let announceTimer = 0;
+  let dragState = null;
+  let suppressPostcardClick = false;
+  let programmaticScroll = false;
+
+  function cardOffset(index) {
+    if (!journalCards.length) return 0;
+    return journalCards[Math.max(0, Math.min(index, journalCards.length - 1))].offsetLeft - journalCards[0].offsetLeft;
+  }
+
+  function nearestCard() {
+    if (!journalCards.length) return 0;
+    return journalCards.reduce((nearest, card, index) => (
+      Math.abs(cardOffset(index) - journalRail.scrollLeft) < Math.abs(cardOffset(nearest) - journalRail.scrollLeft)
+        ? index
+        : nearest
+    ), 0);
+  }
+
+  function updateJournalControls(announce = false, index = nearestCard()) {
+    journalIndex = index;
+    const total = journalCards.length;
+    journalCurrent.textContent = total ? String(journalIndex + 1) : '0';
+    journalTotal.textContent = String(total);
+    journalPrev.disabled = journalIndex === 0 || total < 2;
+    journalNext.disabled = journalIndex >= total - 1 || total < 2;
+    if (announce) {
+      const card = postcards[journalIndex];
+      journalAnnouncement.textContent = total
+        ? `Postcard ${journalIndex + 1} of ${total}: ${placeLabel(card)}`
+        : 'No postcards';
+    }
+  }
+
+  function showCard(index) {
+    if (!journalCards.length) return;
+    journalIndex = Math.max(0, Math.min(index, journalCards.length - 1));
+    programmaticScroll = true;
+    journalRail.scrollTo({
+      left: cardOffset(journalIndex),
+      behavior: reduceMotion.matches ? 'auto' : 'smooth',
+    });
+    updateJournalControls(true, journalIndex);
+  }
+
+  journalPrev.addEventListener('click', () => showCard(journalIndex - 1));
+  journalNext.addEventListener('click', () => showCard(journalIndex + 1));
+  journalRail.addEventListener('keydown', event => {
+    const directions = { ArrowLeft: -1, ArrowRight: 1 };
+    if (event.key in directions) {
+      event.preventDefault();
+      showCard(nearestCard() + directions[event.key]);
+    } else if (event.key === 'Home') {
+      event.preventDefault();
+      showCard(0);
+    } else if (event.key === 'End') {
+      event.preventDefault();
+      showCard(journalCards.length - 1);
+    }
+  });
+
+  journalRail.addEventListener('scroll', () => {
+    if (scrollFrame) return;
+    scrollFrame = requestAnimationFrame(() => {
+      scrollFrame = 0;
+      if (!programmaticScroll) updateJournalControls();
+      clearTimeout(announceTimer);
+      announceTimer = setTimeout(() => {
+        programmaticScroll = false;
+        updateJournalControls(true);
+      }, 180);
+    });
   }, { passive: true });
-  journalTrack.addEventListener('pointerup', () => {
-    journalResumeTimer = setTimeout(() => {
-      pressedPostcard = null;
-      journalTrack.classList.remove('is-pointer-paused');
-    }, 900);
-  }, { passive: true });
-  journalTrack.addEventListener('pointercancel', () => {
-    pressedPostcard = null;
-    journalResumeTimer = setTimeout(() => journalTrack.classList.remove('is-pointer-paused'), 900);
-  }, { passive: true });
+
+  journalRail.addEventListener('pointerdown', event => {
+    programmaticScroll = false;
+    if (event.pointerType !== 'mouse' || event.button !== 0) return;
+    dragState = { id: event.pointerId, x: event.clientX, left: journalRail.scrollLeft, moved: false };
+    journalRail.setPointerCapture(event.pointerId);
+    journalRail.classList.add('is-dragging');
+  });
+  journalRail.addEventListener('pointermove', event => {
+    if (!dragState || dragState.id !== event.pointerId) return;
+    const distance = event.clientX - dragState.x;
+    if (Math.abs(distance) > 5) dragState.moved = true;
+    if (dragState.moved) journalRail.scrollLeft = dragState.left - distance;
+  });
+  const finishDrag = event => {
+    if (!dragState || dragState.id !== event.pointerId) return;
+    suppressPostcardClick = dragState.moved;
+    dragState = null;
+    journalRail.classList.remove('is-dragging');
+    if (journalRail.hasPointerCapture(event.pointerId)) journalRail.releasePointerCapture(event.pointerId);
+    if (suppressPostcardClick) setTimeout(() => { suppressPostcardClick = false; }, 0);
+  };
+  journalRail.addEventListener('pointerup', finishDrag);
+  journalRail.addEventListener('pointercancel', finishDrag);
+  journalRail.addEventListener('click', event => {
+    if (!suppressPostcardClick) return;
+    event.preventDefault();
+    event.stopPropagation();
+  }, true);
+  journalRail.addEventListener('wheel', () => { programmaticScroll = false; }, { passive: true });
+  window.addEventListener('resize', () => updateJournalControls(), { passive: true });
+  updateJournalControls(true);
 }
 
 /* ------------------------------------------------------- postcard lightbox */
@@ -178,12 +266,8 @@ if (lightbox && postcards.length) {
 
   document.addEventListener('click', event => {
     const clickedPostcard = event.target.closest('[data-postcard-open]');
-    const trigger = journalTrack?.contains(event.target) && pressedPostcard
-      ? pressedPostcard
-      : clickedPostcard;
-    if (trigger) {
-      pressedPostcard = null;
-      openLightbox(Number(trigger.dataset.postcardOpen), trigger);
+    if (clickedPostcard) {
+      openLightbox(Number(clickedPostcard.dataset.postcardOpen), clickedPostcard);
     }
   });
   lightbox.querySelectorAll('[data-postcard-lightbox-close]').forEach(el => el.addEventListener('click', closeLightbox));

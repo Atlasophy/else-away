@@ -23,10 +23,10 @@
   <link rel="icon" href="assets/favicon.svg" type="image/svg+xml">
   <title>Else Away by Yaren — Stories from elsewhere</title>
   <!-- Bump this asset version whenever public CSS or JavaScript changes. -->
-  <link rel="stylesheet" href="/styles.css?v=20260803.1">
+  <link rel="stylesheet" href="/styles.css?v=20260803.2">
   <script src="/api/content-script" defer></script>
   <script src="/content.js?v=20260803.1" defer></script>
-  <script src="/script.js?v=20260803.1" defer></script>
+  <script src="/script.js?v=20260803.2" defer></script>
 </head>
 <body class="home-page">
   <a class="skip-link" href="#main">Skip to content</a>
@@ -149,14 +149,22 @@
       <div class="journal-heading section-pad">
         <div class="section-meta reveal">
           <p>04 <span></span> From the road</p>
-          <p class="journal-drift-note">Stories in motion <span>←</span></p>
+          <p class="journal-drift-note">Drag or swipe <span aria-hidden="true">↔</span></p>
         </div>
         <div class="journal-title-row reveal">
           <h2 id="journal-title">Postcards from <em>elsewhere.</em></h2>
           <p>A growing collection of places I’ve wandered through,<br>stayed in, and wanted to remember.</p>
         </div>
+        <div class="journal-controls reveal" aria-label="Postcard carousel controls">
+          <button type="button" data-journal-prev aria-controls="journal-grid" aria-label="Previous postcard">←</button>
+          <p data-journal-status>
+            <span aria-hidden="true"><span data-journal-current>0</span> / <span data-journal-total>0</span></span>
+            <span class="sr-only" data-journal-announcement aria-live="polite" aria-atomic="true">No postcards</span>
+          </p>
+          <button type="button" data-journal-next aria-controls="journal-grid" aria-label="Next postcard">→</button>
+        </div>
       </div>
-      <div class="journal-rail" id="journal-grid">
+      <div class="journal-rail" id="journal-grid" role="region" aria-roledescription="carousel" aria-label="Postcards from elsewhere" tabindex="0">
         <div class="journal-track" data-journal-track>
           <div class="journal-set" data-journal-set></div>
         </div>
