@@ -127,8 +127,8 @@ h1 em, h2 em { font-weight: 400; }
 /* A second print, smaller and turned the other way, tucked into the corner
    as if it had been set down on top of the first. The combined selector keeps
    the primary print's image and padding rules from overriding this variant. */
-.polaroid.polaroid--secondary { position: absolute; z-index: 3; left: -16%; bottom: -10%; width: clamp(116px, 16vw, 180px); padding: 11px 11px 15px; transform: rotate(8deg); }
-.polaroid.polaroid--secondary:hover { transform: rotate(10deg) translateY(-4px); }
+.polaroid.polaroid--secondary { position: absolute; z-index: 3; right: 3%; bottom: 14%; width: clamp(132px, 15vw, 176px); padding: 10px 10px 13px; transform: rotate(4.5deg); }
+.polaroid.polaroid--secondary:hover { transform: rotate(6deg) translateY(-4px); }
 .polaroid.polaroid--secondary img { width: 100%; }
 .about .eyebrow { color: #b7bd9e; }
 .about h2 { margin-bottom: 45px; font-size: clamp(50px, 6vw, 86px); }
@@ -236,7 +236,7 @@ footer div { display: flex; gap: 25px; font-size: 9px; letter-spacing: .12em; te
   .journal-title-row { align-items: start; flex-direction: column; gap: 30px; }
   .about { grid-template-columns: 1fr; gap: 80px; padding-bottom: 135px; }
   .polaroid img { width: min(320px, 62vw); }
-  .polaroid.polaroid--secondary { left: 4%; bottom: -8%; }
+  .polaroid.polaroid--secondary { right: -1%; }
   .about-copy { max-width: 650px; }
   .journal-heading { padding-top: 95px; padding-bottom: 35px; }
   .journal-rail { padding-bottom: 75px; }
@@ -310,5 +310,4 @@ footer div { display: flex; gap: 25px; font-size: 9px; letter-spacing: .12em; te
   .postcard-lightbox-inner { grid-template-columns: 1fr; max-height: 100vh; height: 100%; overflow-y: auto; }
   .postcard-lightbox-media img { max-height: 62vh; }
   .postcard-lightbox-text { padding: 28px 24px 40px; }
-  .polaroid--secondary { width: min(140px, 34vw); left: -8%; bottom: -8%; }
 }
