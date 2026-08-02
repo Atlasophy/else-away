@@ -12,3 +12,6 @@
 
 /
   Cache-Control: no-cache
+
+/script.js
+  X-Debug-Test: hello-world
