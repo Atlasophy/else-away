@@ -1,4 +1,4 @@
--- Else Away content schema (Cloudflare D1)
+-- elseaway content schema (Cloudflare D1)
 --
 -- Shape mirrors content.js exactly, so the API can rebuild that file's JSON
 -- without any translation layer.

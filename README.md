@@ -1,6 +1,6 @@
-# Else Away by Yaren
+# elseaway by Yaren
 
-A responsive travel photography portfolio and journal for Yaren, presented as **Else Away** at [elseaway.com](https://elseaway.com/). The site uses plain HTML, CSS, and JavaScript, so there are no packages to install or build.
+A responsive travel photography portfolio and journal for Yaren, presented as **elseaway** at [elseaway.com](https://elseaway.com/). The site uses plain HTML, CSS, and JavaScript, so there are no packages to install or build.
 
 ## Run locally
 
