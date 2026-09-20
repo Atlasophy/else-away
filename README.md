@@ -1,6 +1,7 @@
 # elseaway by Yaren
 
 > Part of **[Atlasophy](https://github.com/Atlasophy/atlasophy-hq)**. Project status, deployment notes and open threads live in the hub: **[projects/elseaway.md](https://github.com/Atlasophy/atlasophy-hq/blob/main/projects/elseaway.md)**. Brand files, photography and documents belong in Google Drive rather than this repository — see the [Drive map](https://github.com/Atlasophy/atlasophy-hq/blob/main/drive/STRUCTURE.md).
+
 A responsive travel photography portfolio and journal for Yaren, presented as **elseaway** at [elseaway.com](https://elseaway.com/). The site uses plain HTML, CSS, and JavaScript, so there are no packages to install or build.
 
 ## Run locally
