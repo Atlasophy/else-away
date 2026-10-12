@@ -13,11 +13,11 @@ in, and you're in. There's no password to remember or lose.
 The code is only good for a few minutes, and you stay signed in for a day
 before it asks again.
 
-## The three sections
+## The four sections
 
-Across the top you'll see **Postcards**, **Photographs**, and **Details**.
-Whatever you change, nothing goes live until you press **Publish** in the top
-right.
+Across the top you'll see **Postcards**, **Collaborations**, **Photographs**,
+and **Details**. Whatever you change, nothing goes live until you press
+**Publish** in the top right.
 
 ### Postcards
 
@@ -28,6 +28,19 @@ photograph becomes the cover; opening the postcard shows the full set.
 Use **Add photograph** to choose from your uploaded photographs. **Move up** and
 **Move down** change the postcard order. **Remove postcard** removes it from the
 draft; it does not disappear from the public site until you publish.
+
+### Collaborations
+
+A collaboration is a travel partnership — a stay, a restaurant, or another
+place with a story. Give it a place name, a category, where and roughly when,
+a short story, and however many photographs it takes to remember it by. The
+first photograph is the cover; the arrows on each photograph change which one
+leads. An optional link opens the place's own site from the story.
+
+**Add a collaboration**, **Move up**/**Move down**, and **Remove
+collaboration** work exactly like they do for postcards. If the site tells
+you collaboration publishing isn't available yet, your draft is still safe —
+ask whoever looks after the site to finish a one-time setup step first.
 
 ### Photographs
 

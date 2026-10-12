@@ -11,20 +11,43 @@ const pickerDialog = picker.querySelector('[role="dialog"]');
 const uploadInput = document.querySelector('[data-upload-input]');
 const reconnectButton = document.querySelector('[data-reconnect]');
 
-const state = { content: null, view: 'postcards', dirty: false, readOnly: false, images: [], problems: [] };
+const state = {
+  content: null, view: 'postcards', dirty: false, readOnly: false, images: [], problems: [],
+  // Tracked separately from `dirty`: whether the collaborations draft itself
+  // has changed since it was last loaded or published. When the database
+  // has not been migrated yet, this is what tells a postcard-only edit
+  // apart from an edit that would actually need collaboration publishing.
+  collabDirty: false,
+  // In-flight guards so a duplicate click — real or programmatic — during
+  // an upload or a publish already running cannot start a second one.
+  publishing: false, uploading: false,
+};
+const CATEGORIES = ['Restaurant', 'Airbnb', 'Hotel', 'Other'];
 
 const escape = value => String(value ?? '').replace(/[&<>"]/g, c => ({ '&': '&amp;', '<': '&lt;', '>': '&gt;', '"': '&quot;' }[c]));
 const imageSrc = url => (url && (url.startsWith('http') || url.startsWith('/')) ? url : `../${url}`);
+const newCollabId = () => (typeof crypto !== 'undefined' && crypto.randomUUID)
+  ? crypto.randomUUID()
+  : `collab-${Date.now()}-${Math.random().toString(36).slice(2)}`;
 
 function setStatus(message, tone = '') {
   statusLine.textContent = message;
   statusLine.dataset.tone = tone;
 }
 
+function updatePublishAvailability() {
+  publishButton.disabled = state.readOnly || state.publishing || state.uploading || !state.dirty;
+}
+
 function markDirty() {
   state.dirty = true;
-  publishButton.disabled = state.readOnly;
+  updatePublishAvailability();
   if (!state.readOnly) setStatus('Unpublished changes');
+}
+
+function markCollabDirty() {
+  state.collabDirty = true;
+  markDirty();
 }
 
 function setConnected(connected) {
@@ -46,12 +69,13 @@ async function load() {
     // No backend reachable — most likely running the site locally. Show the
     // real content so the studio can be tried, but never pretend it can save.
     const module = await import('../content.js').catch(() => null);
-    state.content = module ? window.ELSE_AWAY : { site: {}, postcards: [] };
+    state.content = module ? window.ELSE_AWAY : { site: {}, postcards: [], collaborations: [] };
     state.readOnly = true;
     setConnected(false);
     setStatus('Session expired — reload the Studio to reconnect', 'error');
   }
-  publishButton.disabled = true;
+  state.content.collaborations ??= [];
+  updatePublishAvailability();
   render();
 }
 
@@ -68,7 +92,7 @@ async function loadImages() {
 function render() {
   document.querySelectorAll('.tab').forEach(tab =>
     tab.setAttribute('aria-current', String(tab.dataset.view === state.view)));
-  const views = { postcards: viewPostcards, photos: viewPhotos, details: viewDetails };
+  const views = { postcards: viewPostcards, collaborations: viewCollaborations, photos: viewPhotos, details: viewDetails };
   workspace.innerHTML = (state.problems.length ? problemsBlock() : '') + views[state.view]();
 }
 
@@ -101,7 +125,7 @@ function postcardCard(index, card) {
           ${images.map((url, photoIndex) => `
             <div class="photo-thumb">
               <img src="${escape(imageSrc(url))}" alt="">
-              <button type="button" data-remove-photo="${index}.${photoIndex}" aria-label="Remove this photograph">✕</button>
+              <button type="button" data-remove-photo="postcards.${index}.${photoIndex}" aria-label="Remove this photograph">✕</button>
             </div>`).join('')}
           <button type="button" class="ghost add photo-add" data-pick="postcards.${index}">+ Add photograph</button>
         </div>
@@ -118,7 +142,7 @@ function viewPostcards() {
   return `
     <div class="view-head">
       <h1>Postcards</h1>
-      <p>The drifting row near the bottom of the site. Give each one a city
+      <p>The row just below the hero. Give each one a city
          and/or country, roughly when it was, a few photographs, and a note —
          for example <em>Venice, Italy, 2026</em> with the story of why it
          mattered. Publishing sends it straight to the site.</p>
@@ -126,6 +150,78 @@ function viewPostcards() {
     <div class="season"><div class="season-body">
       ${state.content.postcards.map((card, index) => postcardCard(index, card)).join('')}
       <button type="button" class="ghost add" data-add-postcard>Add a postcard</button>
+    </div></div>`;
+}
+
+/* A collaboration is a travel partnership: a place, a category, where and
+   roughly when, a short story, an optional link, and however many
+   photographs it takes to remember it by. The first photograph is the
+   cover — the move-left/move-right buttons on each thumbnail are how that
+   order, including which photograph leads, gets changed. */
+function collaborationCard(index, entry) {
+  const images = entry.images ?? [];
+  return `
+    <div class="card postcard-card" data-collab="${index}">
+      <div class="fields">
+        <div class="field wide"><label for="cp-${index}">Place name</label>
+          <input id="cp-${index}" value="${escape(entry.place)}" data-field="place" placeholder="Casa Lio" maxlength="160"></div>
+        <div class="field"><label for="cc-${index}">Category</label>
+          <select id="cc-${index}" data-field="category">
+            ${CATEGORIES.map(category => `<option value="${category}" ${entry.category === category ? 'selected' : ''}>${category}</option>`).join('')}
+          </select></div>
+        <div class="field"><label for="ccity-${index}">City</label>
+          <input id="ccity-${index}" value="${escape(entry.city)}" data-field="city" placeholder="Menorca" maxlength="120"></div>
+        <div class="field"><label for="ccountry-${index}">Country</label>
+          <input id="ccountry-${index}" value="${escape(entry.country)}" data-field="country" placeholder="Spain" maxlength="120"></div>
+        <div class="field"><label for="ctime-${index}">Date or period</label>
+          <input id="ctime-${index}" value="${escape(entry.time)}" data-field="time" placeholder="Summer 2026" maxlength="120"></div>
+        <div class="field wide"><label for="cstory-${index}">Short story</label>
+          <textarea id="cstory-${index}" data-field="story" rows="3" placeholder="What this collaboration was like." maxlength="5000">${escape(entry.story)}</textarea></div>
+        <div class="field wide"><label for="curl-${index}">Place link (optional)</label>
+          <input id="curl-${index}" value="${escape(entry.url)}" data-field="url" placeholder="https://" maxlength="2048">
+          <small>Must start with https:// — shown as "Visit place" from the story.</small></div>
+      </div>
+      <div class="photo-field">
+        <label>Photographs</label>
+        <div class="photo-grid">
+          ${images.map((url, photoIndex) => `
+            <div class="photo-thumb">
+              <img src="${escape(imageSrc(url))}" alt="">
+              <div class="photo-thumb-actions">
+                <button type="button" data-photo-move="collaborations.${index}.${photoIndex}.left" aria-label="Move photograph earlier"${photoIndex === 0 ? ' disabled' : ''}>←</button>
+                <button type="button" data-photo-move="collaborations.${index}.${photoIndex}.right" aria-label="Move photograph later"${photoIndex === images.length - 1 ? ' disabled' : ''}>→</button>
+                <button type="button" data-remove-photo="collaborations.${index}.${photoIndex}" aria-label="Remove this photograph">✕</button>
+              </div>
+            </div>`).join('')}
+          <button type="button" class="ghost add photo-add" data-pick="collaborations.${index}">+ Add photograph</button>
+        </div>
+      </div>
+      <div class="row-actions">
+        <button type="button" class="ghost" data-move="up">Move up</button>
+        <button type="button" class="ghost" data-move="down">Move down</button>
+        <button type="button" class="ghost danger" data-remove-collab>Remove collaboration</button>
+      </div>
+    </div>`;
+}
+
+function viewCollaborations() {
+  const entries = state.content.collaborations ?? [];
+  const unavailable = state.content.collaborationsAvailable === false;
+  return `
+    <div class="view-head">
+      <h1>Collaborations</h1>
+      <p>Travel partnerships — stays, restaurants, and places with a story.
+         Each one shows a cover, a place, a category, and a short story when
+         it opens. Publishing sends it straight to the site.</p>
+    </div>
+    ${unavailable ? `
+      <div class="problems">
+        <h2>Collaboration publishing is unavailable</h2>
+        <ul><li>The site's database has not been migrated for this feature yet. You can still write a draft here — ask whoever looks after the site to run the migration before publishing.</li></ul>
+      </div>` : ''}
+    <div class="season"><div class="season-body">
+      ${entries.length ? entries.map((entry, index) => collaborationCard(index, entry)).join('') : '<p class="picker-empty">No collaborations yet.</p>'}
+      <button type="button" class="ghost add" data-add-collab>Add a collaboration</button>
     </div></div>`;
 }
 
@@ -171,19 +267,29 @@ document.querySelectorAll('.tab').forEach(tab => tab.addEventListener('click', a
   render();
 }));
 
-workspace.addEventListener('input', event => {
+function syncField(event) {
   const field = event.target.dataset.field;
-  const card = event.target.closest('[data-postcard]');
 
   if (event.target.dataset.siteField) {
     state.content.site[event.target.dataset.siteField] = event.target.value;
     return markDirty();
   }
-  if (!field || !card) return;
+  if (!field) return;
 
-  state.content.postcards[Number(card.dataset.postcard)][field] = event.target.value;
-  markDirty();
-});
+  const postcard = event.target.closest('[data-postcard]');
+  const collab = event.target.closest('[data-collab]');
+  if (postcard) {
+    state.content.postcards[Number(postcard.dataset.postcard)][field] = event.target.value;
+    markDirty();
+  } else if (collab) {
+    state.content.collaborations[Number(collab.dataset.collab)][field] = event.target.value;
+    markCollabDirty();
+  }
+}
+// 'change' covers <select>, since the category field needs its value synced
+// the moment it is chosen, not just when some other input event fires later.
+workspace.addEventListener('input', syncField);
+workspace.addEventListener('change', syncField);
 
 workspace.addEventListener('click', event => {
   const button = event.target.closest('button');
@@ -193,24 +299,45 @@ workspace.addEventListener('click', event => {
     state.content.postcards.push({ city: '', country: '', time: '', note: '', images: [] });
     markDirty(); return render();
   }
+  if (button.dataset.addCollab !== undefined) {
+    state.content.collaborations.push({ id: newCollabId(), place: '', category: 'Other', city: '', country: '', time: '', story: '', url: '', images: [] });
+    markCollabDirty(); return render();
+  }
   if (button.hasAttribute('data-remove-postcard')) {
     state.content.postcards.splice(Number(button.closest('[data-postcard]').dataset.postcard), 1);
     markDirty(); return render();
   }
+  if (button.hasAttribute('data-remove-collab')) {
+    state.content.collaborations.splice(Number(button.closest('[data-collab]').dataset.collab), 1);
+    markCollabDirty(); return render();
+  }
   if (button.dataset.removePhoto) {
-    const [cardIndex, photoIndex] = button.dataset.removePhoto.split('.').map(Number);
-    state.content.postcards[cardIndex].images.splice(photoIndex, 1);
-    markDirty(); return render();
+    const [kind, cardIndex, photoIndex] = button.dataset.removePhoto.split('.');
+    state.content[kind][Number(cardIndex)].images.splice(Number(photoIndex), 1);
+    if (kind === 'collaborations') markCollabDirty(); else markDirty();
+    return render();
+  }
+  if (button.dataset.photoMove) {
+    const [kind, cardIndex, photoIndex, direction] = button.dataset.photoMove.split('.');
+    const images = state.content[kind][Number(cardIndex)].images;
+    const from = Number(photoIndex);
+    const to = direction === 'left' ? from - 1 : from + 1;
+    if (to < 0 || to >= images.length) return;
+    [images[from], images[to]] = [images[to], images[from]];
+    if (kind === 'collaborations') markCollabDirty(); else markDirty();
+    return render();
   }
   if (button.dataset.move) {
-    const card = button.closest('[data-postcard]');
+    const postcard = button.closest('[data-postcard]');
+    const collab = button.closest('[data-collab]');
     const step = button.dataset.move === 'up' ? -1 : 1;
-    const list = state.content.postcards;
-    const from = Number(card.dataset.postcard);
+    const list = postcard ? state.content.postcards : state.content.collaborations;
+    const from = Number((postcard ?? collab).dataset[postcard ? 'postcard' : 'collab']);
     const to = from + step;
     if (to < 0 || to >= list.length) return;
     [list[from], list[to]] = [list[to], list[from]];
-    markDirty(); return render();
+    if (collab) markCollabDirty(); else markDirty();
+    return render();
   }
   if (button.dataset.pick) return openPicker(button.dataset.pick);
   if (button.dataset.openPicker) return openPicker(null);
@@ -278,9 +405,10 @@ pickerGrid.addEventListener('click', event => {
   const [kind, a] = pickerTarget.split('.');
   const url = chosen.dataset.choose;
   if (kind === 'postcards') state.content.postcards[Number(a)].images.push(url);
+  else if (kind === 'collaborations') state.content.collaborations[Number(a)].images.push(url);
   const focusTarget = pickerTarget;
   closePicker(false);
-  markDirty();
+  if (kind === 'collaborations') markCollabDirty(); else markDirty();
   render();
   workspace.querySelector(`[data-pick="${focusTarget}"]`)?.focus();
 });
@@ -350,42 +478,71 @@ uploadInput.addEventListener('change', async event => {
   const files = [...event.target.files];
   if (!files.length) return;
   if (state.readOnly) return setStatus('Session expired — reload the Studio to upload', 'error');
-
-  for (const [position, file] of files.entries()) {
-    setStatus(`Sending ${position + 1} of ${files.length}…`);
-    try {
-      const { blob, width, height } = await prepare(file);
-      const form = new FormData();
-      const type = blob.type || 'image/webp';
-      const extension = type === 'image/png' ? 'png' : type === 'image/jpeg' ? 'jpg' : 'webp';
-      form.append('file', new File([blob], `${file.name.replace(/\.[^.]+$/, '')}.${extension}`, { type }));
-      form.append('name', file.name);
-      form.append('width', width);
-      form.append('height', height);
-      const response = await fetch('/api/admin/upload', { method: 'POST', body: form });
-      if (!response.ok) throw new Error((await response.json()).error ?? 'Upload failed.');
-    } catch (error) {
-      setStatus(error.message, 'error');
-      return;
-    }
+  if (state.publishing) {
+    event.target.value = '';
+    return setStatus('Publishing — try uploading again in a moment.', 'error');
   }
-  event.target.value = '';
-  setStatus(`${files.length} photograph${files.length === 1 ? '' : 's'} uploaded`, 'saved');
-  await openPicker(pickerTarget);
+
+  state.uploading = true;
+  uploadInput.disabled = true;
+  updatePublishAvailability();
+  try {
+    for (const [position, file] of files.entries()) {
+      setStatus(`Sending ${position + 1} of ${files.length}…`);
+      try {
+        const { blob, width, height } = await prepare(file);
+        const form = new FormData();
+        const type = blob.type || 'image/webp';
+        const extension = type === 'image/png' ? 'png' : type === 'image/jpeg' ? 'jpg' : 'webp';
+        form.append('file', new File([blob], `${file.name.replace(/\.[^.]+$/, '')}.${extension}`, { type }));
+        form.append('name', file.name);
+        form.append('width', width);
+        form.append('height', height);
+        const response = await fetch('/api/admin/upload', { method: 'POST', body: form });
+        if (!response.ok) throw new Error((await response.json()).error ?? 'Upload failed.');
+      } catch (error) {
+        setStatus(error.message, 'error');
+        return;
+      }
+    }
+    event.target.value = '';
+    setStatus(`${files.length} photograph${files.length === 1 ? '' : 's'} uploaded`, 'saved');
+    await openPicker(pickerTarget);
+  } finally {
+    uploadInput.disabled = state.readOnly;
+    state.uploading = false;
+    updatePublishAvailability();
+  }
 });
 
 /* -------------------------------------------------------------- publishing */
 
 publishButton.addEventListener('click', async () => {
-  if (state.readOnly) return;
-  publishButton.disabled = true;
+  if (state.readOnly || state.publishing || state.uploading) return;
+  state.publishing = true;
+  updatePublishAvailability();
   setStatus('Publishing…');
   state.problems = [];
 
-  const payload = {
-    site: state.content.site,
-    postcards: state.content.postcards,
-  };
+  // An unmigrated database cannot accept collaborations at all. A payload
+  // that never touches that field still lets postcard and detail changes
+  // through — the field is only ever omitted here, never sent empty, so
+  // writeContent's own distinction between "omitted" and "explicitly []"
+  // stays meaningful. If the collaborations draft has actually changed,
+  // silently dropping it would read as a successful save while losing
+  // real edits, so that case is refused locally, before any request, with
+  // the same message the server would give — and the draft is kept.
+  const collaborationsUnavailable = state.content.collaborationsAvailable === false;
+  if (collaborationsUnavailable && state.collabDirty) {
+    state.problems = ['Collaboration publishing is unavailable until the database is migrated. Your collaboration changes have not been published — ask whoever looks after the site to run the migration first.'];
+    setStatus('Nothing was published', 'error');
+    state.publishing = false;
+    updatePublishAvailability();
+    return render();
+  }
+
+  const payload = { site: state.content.site, postcards: state.content.postcards };
+  if (!collaborationsUnavailable) payload.collaborations = state.content.collaborations;
 
   try {
     const response = await fetch('/api/admin/content', {
@@ -397,15 +554,17 @@ publishButton.addEventListener('click', async () => {
     if (!response.ok) {
       state.problems = body.errors ?? [body.error ?? 'Something went wrong.'];
       setStatus('Nothing was published', 'error');
-      publishButton.disabled = false;
-      return render();
+      return;
     }
     state.dirty = false;
+    if (!collaborationsUnavailable) state.collabDirty = false;
     setStatus('Published', 'saved');
-    render();
   } catch {
     setStatus('Could not reach the site. Nothing was published.', 'error');
-    publishButton.disabled = false;
+  } finally {
+    state.publishing = false;
+    updatePublishAvailability();
+    render();
   }
 });
 
