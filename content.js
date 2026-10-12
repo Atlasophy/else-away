@@ -52,5 +52,6 @@ window.ELSE_AWAY = window.ELSE_AWAY || {
       "note": "Three days in the orchard cabin reached only on foot",
       "images": ["assets/stories/spring-2.webp"]
     }
-  ]
+  ],
+  "collaborations": []
 };

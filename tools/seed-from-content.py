@@ -10,6 +10,7 @@ state. Run from the repository root:
 import json
 import pathlib
 import sys
+import uuid
 
 root = pathlib.Path(__file__).resolve().parent.parent
 source = root / 'content.js'
@@ -21,6 +22,14 @@ data = json.loads(raw[raw.index('{'):raw.rindex('}') + 1])
 
 def q(value):
     return "'" + str(value).replace("'", "''") + "'"
+
+
+def collaboration_id(entry):
+    # Stable per entry, not positional like a postcard's: a supplied id is
+    # kept as-is so re-running this generator never reassigns one that is
+    # already in use, and anything without one gets a fresh UUID.
+    value = entry.get('id')
+    return value if isinstance(value, str) and value else str(uuid.uuid4())
 
 
 lines = [
@@ -45,8 +54,32 @@ for index, card in enumerate(data['postcards']):
             'INSERT INTO postcard_images (postcard_id, image, position) VALUES '
             f"({index + 1}, {q(image)}, {photo_index});"
         )
+lines.append('')
+
+collaborations = data.get('collaborations', [])
+if collaborations:
+    lines.append('DELETE FROM collaboration_images; DELETE FROM collaborations;')
+    lines.append('')
+    for index, entry in enumerate(collaborations):
+        cid = collaboration_id(entry)
+        lines.append(
+            'INSERT INTO collaborations (id, place, category, city, country, time_label, story, url, position) VALUES ('
+            f"{q(cid)}, {q(entry.get('place', ''))}, {q(entry.get('category', 'Other'))}, "
+            f"{q(entry.get('city', ''))}, {q(entry.get('country', ''))}, {q(entry.get('time', ''))}, "
+            f"{q(entry.get('story', ''))}, {q(entry.get('url', ''))}, {index});"
+        )
+        for photo_index, image in enumerate(entry.get('images', [])):
+            lines.append(
+                'INSERT INTO collaboration_images (collaboration_id, image, position) VALUES '
+                f"({q(cid)}, {q(image)}, {photo_index});"
+            )
 
 target.write_text('\n'.join(lines) + '\n')
 
 photos = sum(len(card['images']) for card in data['postcards'])
-print(f'seed.sql written — {len(data["postcards"])} postcards, {photos} photographs', file=sys.stderr)
+collab_photos = sum(len(entry.get('images', [])) for entry in collaborations)
+print(
+    f'seed.sql written — {len(data["postcards"])} postcards, {photos} photographs, '
+    f'{len(collaborations)} collaborations, {collab_photos} collaboration photographs',
+    file=sys.stderr,
+)

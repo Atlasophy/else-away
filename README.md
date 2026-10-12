@@ -22,10 +22,10 @@ npx serve .
 
 ## Customize
 
-- Postcards and site details: `content.js` — the single source of truth
+- Postcards, collaborations and site details: `content.js` — the single source of truth
 - Main page copy and links: `index.html`
 - Colors and layout: `styles.css`
-- Homepage interactions, including the postcard lightbox: `script.js`
+- Homepage interactions, including both lightboxes: `script.js`
 - Images and favicon: `assets/`
 
 In production, `/api/content-script` loads the published database content before
@@ -34,12 +34,28 @@ live content through `/admin`.
 
 ## The studio
 
-`/admin` is where Yaren adds postcards, uploads photographs, and writes. Each
-postcard holds a city, a country, roughly when it was, a note, and however many
-photographs it takes to remember the place by — for example *Venice, Italy,
-2026* with a handful of photographs and a short note about it. Opening `/admin`
-locally shows the real content but refuses to save, since there is no database
-to save to.
+`/admin` is where Yaren adds postcards, collaborations, uploads photographs,
+and writes. Each postcard holds a city, a country, roughly when it was, a
+note, and however many photographs it takes to remember the place by — for
+example *Venice, Italy, 2026* with a handful of photographs and a short note
+about it. A collaboration is the same idea for a travel partnership — a
+place, a category (restaurant, Airbnb, hotel, or other), a short story, an
+optional link to the place, and a gallery with its own cover. Opening
+`/admin` locally shows the real content but refuses to save, since there is
+no database to save to.
+
+Collaborations need the `collaborations` and `collaboration_images` tables,
+added by `tools/migrations/2026-10-12-collaborations.sql` (already part of
+`schema.sql` for fresh installs). On an already-running database, apply it
+once before deploying code that depends on it:
+
+```bash
+wrangler d1 execute else-away --remote --file=tools/migrations/2026-10-12-collaborations.sql
+```
+
+Until that migration runs, postcards keep publishing normally; collaboration
+publishing specifically is refused with a clear message rather than silently
+dropped.
 
 Photographs are resized and converted to webp **in the browser** before upload,
 so originals straight from a camera are fine and nothing large crosses the

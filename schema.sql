@@ -45,3 +45,38 @@ CREATE TABLE IF NOT EXISTS images (
   bytes      INTEGER,
   created_at TEXT NOT NULL DEFAULT (datetime('now'))
 );
+
+-- A collaboration is a travel partnership: a place Yaren stayed at, ate at,
+-- or worked with, told through a short story and a small gallery. Mirrors the
+-- postcards tables above, so publishing follows the same atomic pattern (see
+-- functions/lib/content.js). Added 2026-10-12 — see
+-- tools/migrations/2026-10-12-collaborations.sql for the equivalent, additive
+-- statement to run against an already-running database.
+-- Collaborations use a caller-supplied, stable TEXT id (a UUID from the
+-- studio) rather than an autoincrement integer, since the brief requires the
+-- id to survive edits, reorders and republishing instead of being
+-- repositional like a postcard's. This table has never been deployed, so the
+-- id shape can still be chosen outright here.
+CREATE TABLE IF NOT EXISTS collaborations (
+  id         TEXT PRIMARY KEY,
+  place      TEXT NOT NULL DEFAULT '',
+  category   TEXT NOT NULL DEFAULT 'Other',
+  city       TEXT NOT NULL DEFAULT '',
+  country    TEXT NOT NULL DEFAULT '',
+  time_label TEXT NOT NULL DEFAULT '',
+  story      TEXT NOT NULL DEFAULT '',
+  url        TEXT NOT NULL DEFAULT '',
+  position   INTEGER NOT NULL
+);
+
+-- A collaboration can carry more than one photograph, shown in its gallery in
+-- this order. Deleting a collaboration cascades to its photographs.
+CREATE TABLE IF NOT EXISTS collaboration_images (
+  id               INTEGER PRIMARY KEY AUTOINCREMENT,
+  collaboration_id TEXT NOT NULL REFERENCES collaborations(id) ON DELETE CASCADE,
+  image            TEXT NOT NULL,
+  position         INTEGER NOT NULL DEFAULT 0
+);
+
+CREATE INDEX IF NOT EXISTS idx_collaborations_order ON collaborations(position);
+CREATE INDEX IF NOT EXISTS idx_collaboration_images ON collaboration_images(collaboration_id, position);
