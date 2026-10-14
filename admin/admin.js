@@ -11,7 +11,7 @@ const pickerDialog = picker.querySelector('[role="dialog"]');
 const uploadInput = document.querySelector('[data-upload-input]');
 const reconnectButton = document.querySelector('[data-reconnect]');
 
-const state = { content: null, view: 'postcards', dirty: false, readOnly: false, images: [], problems: [] };
+const state = { content: null, view: 'about', dirty: false, readOnly: false, images: [], problems: [] };
 
 const escape = value => String(value ?? '').replace(/[&<>"]/g, c => ({ '&': '&amp;', '<': '&lt;', '>': '&gt;', '"': '&quot;' }[c]));
 const imageSrc = url => (url && (url.startsWith('http') || url.startsWith('/')) ? url : `../${url}`);
@@ -49,7 +49,14 @@ async function load() {
     state.content = module ? window.ELSE_AWAY : { site: {}, postcards: [] };
     state.readOnly = true;
     setConnected(false);
-    setStatus('Session expired — reload the Studio to reconnect', 'error');
+    setStatus(location.hostname === 'localhost' || location.hostname === '127.0.0.1'
+      ? 'Local preview — publishing is unavailable'
+      : 'Studio disconnected — reload to reconnect', 'error');
+  }
+  state.content.site ??= {};
+  state.content.collaborations ??= [];
+  for (const group of window.ELSE_AWAY_COPY ?? []) {
+    for (const field of group.fields) state.content.site[field.key] ??= field.default;
   }
   publishButton.disabled = true;
   render();
@@ -68,7 +75,7 @@ async function loadImages() {
 function render() {
   document.querySelectorAll('.tab').forEach(tab =>
     tab.setAttribute('aria-current', String(tab.dataset.view === state.view)));
-  const views = { postcards: viewPostcards, photos: viewPhotos, details: viewDetails };
+  const views = { collaborations: viewCollaborations, about: () => viewWriting(true), writing: () => viewWriting(false), postcards: viewPostcards, photos: viewPhotos, details: viewDetails };
   workspace.innerHTML = (state.problems.length ? problemsBlock() : '') + views[state.view]();
 }
 
@@ -81,11 +88,15 @@ const problemsBlock = () => `
 /* A postcard is a place: where, roughly when, a note about it, and however
    many photographs it takes to remember it by. The first photograph is the
    one the rail shows before anyone opens the card. */
-function postcardCard(index, card) {
+function postcardCard(index, card, kind = 'postcards') {
   const images = card.images ?? [];
   return `
-    <div class="card postcard-card" data-postcard="${index}">
+    <div class="card postcard-card" data-postcard="${index}" data-kind="${kind}">
       <div class="fields">
+        ${kind === 'collaborations' ? `
+          ${[['title', 'Project title'], ['partner', 'Partner / brand'], ['location', 'Location'], ['year', 'Year']].map(([key, label]) => `<div class="field"><label for="collab-${index}-${key}">${label}</label><input id="collab-${index}-${key}" data-field="${key}" maxlength="${key === 'year' ? 120 : 160}" value="${escape(card[key])}"></div>`).join('')}
+          <div class="field wide"><label for="collab-${index}-description">Project story</label><textarea id="collab-${index}-description" data-field="description" rows="4" maxlength="5000">${escape(card.description)}</textarea></div>
+        ` : `
         <div class="field"><label for="pc-${index}">City</label>
           <input id="pc-${index}" value="${escape(card.city)}" data-field="city" placeholder="Venice"></div>
         <div class="field"><label for="pn-${index}">Country</label>
@@ -93,7 +104,7 @@ function postcardCard(index, card) {
         <div class="field"><label for="pd-${index}">Time</label>
           <input id="pd-${index}" value="${escape(card.time)}" data-field="time" placeholder="2026"></div>
         <div class="field wide"><label for="pt-${index}">Note</label>
-          <textarea id="pt-${index}" data-field="note" rows="3" placeholder="What this place was like.">${escape(card.note)}</textarea></div>
+          <textarea id="pt-${index}" data-field="note" rows="3" placeholder="What this place was like.">${escape(card.note)}</textarea></div>`}
       </div>
       <div class="photo-field">
         <label>Photographs</label>
@@ -101,15 +112,15 @@ function postcardCard(index, card) {
           ${images.map((url, photoIndex) => `
             <div class="photo-thumb">
               <img src="${escape(imageSrc(url))}" alt="">
-              <button type="button" data-remove-photo="${index}.${photoIndex}" aria-label="Remove this photograph">✕</button>
+              <button type="button" data-remove-photo="${index}.${photoIndex}" data-remove-kind="${kind}" aria-label="Remove this photograph">✕</button>
             </div>`).join('')}
-          <button type="button" class="ghost add photo-add" data-pick="postcards.${index}">+ Add photograph</button>
+          <button type="button" class="ghost add photo-add" data-pick="${kind}.${index}">+ Add photograph</button>
         </div>
       </div>
       <div class="row-actions">
         <button type="button" class="ghost" data-move="up">Move up</button>
         <button type="button" class="ghost" data-move="down">Move down</button>
-        <button type="button" class="ghost danger" data-remove-postcard>Remove postcard</button>
+        <button type="button" class="ghost danger" data-remove-postcard>Remove ${kind === 'collaborations' ? 'collaboration' : 'postcard'}</button>
       </div>
     </div>`;
 }
@@ -118,14 +129,19 @@ function viewPostcards() {
   return `
     <div class="view-head">
       <h1>Postcards</h1>
-      <p>The drifting row near the bottom of the site. Give each one a city
-         and/or country, roughly when it was, a few photographs, and a note —
-         for example <em>Venice, Italy, 2026</em> with the story of why it
-         mattered. Publishing sends it straight to the site.</p>
+      <p>Places and stories for your postcard collection. The first three appear on the homepage; every postcard is available on the Postcards page.</p>
     </div>
     <div class="season"><div class="season-body">
       ${state.content.postcards.map((card, index) => postcardCard(index, card)).join('')}
       <button type="button" class="ghost add" data-add-postcard>Add a postcard</button>
+    </div></div>`;
+}
+
+function viewCollaborations() {
+  return `<div class="view-head"><h1>Collaborations</h1><p>Give each project a title, partner, story, and photographs. The first photograph becomes its cover. The first three projects appear on the homepage.</p></div>
+    <div class="season"><div class="season-body">
+      ${state.content.collaborations.length ? state.content.collaborations.map((card, index) => postcardCard(index, card, 'collaborations')).join('') : '<p class="collection-editor-empty">No collaborations yet. Add your first project when it’s ready.</p>'}
+      <button type="button" class="ghost add" data-add-collaboration>Add a collaboration</button>
     </div></div>`;
 }
 
@@ -146,6 +162,26 @@ function viewPhotos() {
     </div></div>`;
 }
 
+function viewWriting(aboutOnly) {
+  const groups = (window.ELSE_AWAY_COPY ?? []).filter(group =>
+    (group.title === 'About me') === aboutOnly);
+  return `
+    <div class="view-head"><h1>${aboutOnly ? 'About me' : 'Site writing'}</h1>
+      <p>Edit the text shown on your website. Publish when you’re ready.</p></div>
+    <div class="writing-editor">
+      ${groups.map(group => `<section class="writing-section" aria-labelledby="group-${group.fields[0].key}">
+        ${aboutOnly ? '' : `<h2 id="group-${group.fields[0].key}">${escape(group.title)}</h2>`}
+        ${aboutOnly ? `<h2 class="sr-only" id="group-${group.fields[0].key}">About me text</h2>` : ''}
+        <div class="fields">
+          ${group.fields.map(field => `<div class="field wide">
+            <label for="site-${field.key}">${escape(field.label)}</label>
+            <textarea id="site-${field.key}" data-site-field="${field.key}" maxlength="5000" rows="${field.default.length > 150 ? 4 : 2}">${escape(state.content.site[field.key])}</textarea>
+          </div>`).join('')}
+        </div>
+      </section>`).join('')}
+    </div>`;
+}
+
 function viewDetails() {
   const site = state.content.site ?? {};
   const rows = [
@@ -153,7 +189,7 @@ function viewDetails() {
     ['instagram', 'Instagram link'], ['credit', 'Footer credit'],
   ];
   return `
-    <div class="view-head"><h1>Details</h1><p>The things that rarely change.</p></div>
+    <div class="view-head"><h1>Details</h1><p>Contact links and the credit at the bottom of your website.</p></div>
     <div class="season"><div class="season-body"><div class="card" data-site style="grid-template-columns:1fr">
       <div class="fields">
         ${rows.map(([key, label]) => `
@@ -181,7 +217,7 @@ workspace.addEventListener('input', event => {
   }
   if (!field || !card) return;
 
-  state.content.postcards[Number(card.dataset.postcard)][field] = event.target.value;
+  state.content[card.dataset.kind ?? 'postcards'][Number(card.dataset.postcard)][field] = event.target.value;
   markDirty();
 });
 
@@ -189,23 +225,28 @@ workspace.addEventListener('click', event => {
   const button = event.target.closest('button');
   if (!button) return;
 
+  if (button.hasAttribute('data-add-collaboration')) {
+    state.content.collaborations.push({ title: '', partner: '', location: '', year: '', description: '', images: [] });
+    markDirty(); return render();
+  }
   if (button.dataset.addPostcard !== undefined) {
     state.content.postcards.push({ city: '', country: '', time: '', note: '', images: [] });
     markDirty(); return render();
   }
   if (button.hasAttribute('data-remove-postcard')) {
-    state.content.postcards.splice(Number(button.closest('[data-postcard]').dataset.postcard), 1);
+    const card = button.closest('[data-postcard]');
+    state.content[card.dataset.kind ?? 'postcards'].splice(Number(card.dataset.postcard), 1);
     markDirty(); return render();
   }
   if (button.dataset.removePhoto) {
     const [cardIndex, photoIndex] = button.dataset.removePhoto.split('.').map(Number);
-    state.content.postcards[cardIndex].images.splice(photoIndex, 1);
+    state.content[button.dataset.removeKind ?? 'postcards'][cardIndex].images.splice(photoIndex, 1);
     markDirty(); return render();
   }
   if (button.dataset.move) {
     const card = button.closest('[data-postcard]');
     const step = button.dataset.move === 'up' ? -1 : 1;
-    const list = state.content.postcards;
+    const list = state.content[card.dataset.kind ?? 'postcards'];
     const from = Number(card.dataset.postcard);
     const to = from + step;
     if (to < 0 || to >= list.length) return;
@@ -277,7 +318,7 @@ pickerGrid.addEventListener('click', event => {
   if (!chosen || !pickerTarget) return;
   const [kind, a] = pickerTarget.split('.');
   const url = chosen.dataset.choose;
-  if (kind === 'postcards') state.content.postcards[Number(a)].images.push(url);
+  if (['postcards', 'collaborations'].includes(kind)) state.content[kind][Number(a)].images.push(url);
   const focusTarget = pickerTarget;
   closePicker(false);
   markDirty();
@@ -385,6 +426,7 @@ publishButton.addEventListener('click', async () => {
   const payload = {
     site: state.content.site,
     postcards: state.content.postcards,
+    collaborations: state.content.collaborations,
   };
 
   try {

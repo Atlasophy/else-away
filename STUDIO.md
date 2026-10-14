@@ -3,6 +3,12 @@
 This is how you change what's on your website. You don't need anyone's help to
 do any of it, and you can't break anything permanently.
 
+## Local preview
+
+Open `http://localhost:8000/admin/` to try the writing fields. The static local
+preview does not publish or persist edits. Publishing requires the connected
+studio described below.
+
 ## Getting in
 
 Go to **elseaway.com/admin**
@@ -13,15 +19,39 @@ in, and you're in. There's no password to remember or lose.
 The code is only good for a few minutes, and you stay signed in for a day
 before it asks again.
 
-## The three sections
+## The sections
 
-Across the top you'll see **Postcards**, **Photographs**, and **Details**.
+Across the top you'll see **About me**, **Site writing**, **Details**,
+**Collaborations**, **Postcards**, and **Photographs**.
 Whatever you change, nothing goes live until you press **Publish** in the top
 right.
 
+### About me
+
+Edit your heading, three paragraphs, closing thought, signature, and photograph
+caption. These fields change only the writing; photographs and animation stay
+as they are. Use a new line when you want a line break. Text is plain text,
+so HTML is shown as writing rather than interpreted.
+
+### Site writing
+
+The rest of the page is grouped into Homepage, Introduction, Work with me,
+Postcards introduction, and Contact. Edit headings, descriptions, location,
+and service copy here.
+
+### Collaborations
+
+Add real projects with a title, partner or brand, location, year, a short story,
+and one or more photographs. The first photograph is the cover. Move projects
+up or down to set their order; the first three appear on the homepage. Every
+published project is available on `/collaborations/`. No project is shown until
+it has a title and a photograph and you publish it.
+
 ### Postcards
 
-The row that drifts sideways near the bottom of the site. Each postcard has a
+The photo-led collection near the bottom of the site. The first three postcards
+appear on the homepage, linking to `/postcards/`, where visitors can search
+and open every postcard. Each postcard has a
 city, country, approximate time, note, and one or more photographs. The first
 photograph becomes the cover; opening the postcard shows the full set.
 

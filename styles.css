@@ -152,51 +152,6 @@ h1 em, h2 em { font-weight: 400; }
 .button-outline, .button-light { display: inline-flex; justify-content: space-between; align-items: center; min-width: 190px; padding: 16px 18px; border: 1px solid rgba(241,234,220,.5); font-size: 10px; letter-spacing: .14em; text-transform: uppercase; transition: background .25s, color .25s; }
 .button-outline:hover { color: var(--green); background: var(--cream); }
 
-.journal { position: relative; margin-top: -1px; overflow: hidden; color: var(--cream); background: linear-gradient(180deg, var(--green-lift) 0%, rgba(49,69,58,0) 190px), radial-gradient(ellipse at 50% 28%, var(--green-lift) 0%, var(--green) 46%, var(--green-deep) 100%); box-shadow: inset 0 -100px 140px rgba(0,0,0,.3); }
-.journal::before { content: ""; position: absolute; inset: 0; pointer-events: none; background: radial-gradient(ellipse at center, transparent 35%, rgba(3,14,9,.38) 120%); -webkit-mask-image: linear-gradient(180deg, transparent 0, #000 230px); mask-image: linear-gradient(180deg, transparent 0, #000 230px); }
-.journal-heading { position: relative; z-index: 2; padding-top: 110px; padding-bottom: 42px; }
-.journal .section-meta { color: rgba(241,234,220,.68); }
-.journal-drift-note { display: flex; align-items: center; gap: 18px; font-size: 9px; letter-spacing: .16em; text-transform: uppercase; }
-.journal-drift-note span { color: #d8aa70; font-size: 16px; }
-.journal-title-row { margin: 36px 0 0; }
-.journal-title-row h2 { font-size: clamp(56px, 6.2vw, 94px); }
-.journal-title-row p { color: rgba(241,234,220,.64); }
-.journal-controls { display: flex; align-items: center; justify-content: flex-end; gap: 10px; width: max-content; margin: 30px 0 0 auto; }
-.journal-controls[hidden] { display: none; }
-.journal-controls button { display: grid; place-items: center; width: 44px; height: 44px; padding: 0; border: 1px solid rgba(241,234,220,.42); border-radius: 50%; background: transparent; color: var(--cream); cursor: pointer; transition: color .18s, background .18s, border-color .18s, opacity .18s; }
-.journal-controls button:hover:not(:disabled) { border-color: var(--cream); background: rgba(241,234,220,.1); }
-.journal-controls button:disabled { opacity: .28; cursor: default; }
-.journal-controls p { min-width: 54px; margin: 0; color: rgba(241,234,220,.72); text-align: center; font: 500 9px/1 var(--mono); letter-spacing: .12em; }
-.journal-rail { --journal-card-width: clamp(250px, 21vw, 330px); --journal-gutter: 8.5vw; position: relative; z-index: 2; overflow-x: auto; overflow-y: hidden; padding: 0 0 90px; perspective: 1200px; scroll-behavior: smooth; scroll-snap-type: x mandatory; scroll-padding-inline: var(--journal-gutter); scrollbar-width: none; overscroll-behavior-inline: contain; cursor: grab; -webkit-overflow-scrolling: touch; -webkit-mask-image: linear-gradient(90deg, transparent, #000 5vw, #000 calc(100% - 5vw), transparent); mask-image: linear-gradient(90deg, transparent, #000 5vw, #000 calc(100% - 5vw), transparent); }
-.journal-rail::-webkit-scrollbar { display: none; }
-.journal-rail.is-dragging { cursor: grabbing; scroll-snap-type: none; user-select: none; }
-.journal-rail.is-empty { cursor: default; scroll-snap-type: none; }
-.journal-rail.is-empty .journal-track, .journal-rail.is-empty .journal-set { width: 100%; padding-right: 0; padding-left: 0; }
-.journal-track { display: flex; width: max-content; padding: 0 max(var(--journal-gutter), calc(100vw - var(--journal-gutter) - var(--journal-card-width))) 0 var(--journal-gutter); }
-.journal-set { display: flex; flex: none; gap: 22px; }
-.journal-empty { margin: 0; padding: 34px 8.5vw 70px; color: rgba(241,234,220,.72); font: italic 22px/1.5 var(--serif); }
-/* Each card owns a fixed lane in the rail. The single, scroll-snapped set
-   cannot collide with a duplicated animation loop, even with one or many cards. */
-.journal-card { position: relative; flex: 0 0 var(--journal-card-width); min-width: 0; color: var(--cream); perspective: 1200px; scroll-snap-align: start; scroll-snap-stop: normal; isolation: isolate; }
-.journal-card:hover, .journal-card:focus-within { z-index: 2; }
-.journal-card-inner { position: relative; transform-style: preserve-3d; transition: transform .85s cubic-bezier(.3,.7,.25,1); }
-.journal-card:hover .journal-card-inner, .journal-card:focus-within .journal-card-inner { transform: rotateY(180deg); }
-.journal-front, .journal-back { backface-visibility: hidden; }
-.journal-card:hover .journal-front, .journal-card:focus-within .journal-front { pointer-events: none; }
-.journal-back { position: absolute; inset: 0; display: flex; flex-direction: column; justify-content: space-between; padding: 26px 22px 22px; color: #3b2f22; background: #efe6d4; transform: rotateY(180deg); box-shadow: var(--shadow-print); }
-/* Airmail edging, drawn rather than imported. */
-.journal-back::before { content: ""; position: absolute; inset: 0; padding: 6px; pointer-events: none; background: repeating-linear-gradient(45deg, #a8443a 0 9px, #efe6d4 9px 18px, #3f5c73 18px 27px, #efe6d4 27px 36px); -webkit-mask: linear-gradient(#000 0 0) content-box exclude, linear-gradient(#000 0 0); mask: linear-gradient(#000 0 0) content-box exclude, linear-gradient(#000 0 0); }
-.journal-postmark { align-self: flex-end; display: grid; place-items: center; flex: 0 0 auto; width: 74px; height: 74px; border: 1px solid rgba(59,47,34,.5); border-radius: 50%; color: rgba(59,47,34,.72); font: 500 7px/1.35 var(--mono); letter-spacing: .1em; text-align: center; text-transform: uppercase; transform: rotate(-11deg); }
-.journal-note { display: -webkit-box; margin: 0; overflow: hidden; font: italic 16px/1.5 var(--serif); -webkit-box-orient: vertical; -webkit-line-clamp: 5; }
-.journal-back .journal-cta { display: flex; justify-content: space-between; align-items: center; padding-top: 12px; border-top: 1px solid rgba(59,47,34,.32); color: #3b2f22; font: 500 8px/1 var(--mono); letter-spacing: .15em; text-transform: uppercase; }
-.journal-card:nth-child(3n+2) { transform: translateY(12px); }
-.journal-image { aspect-ratio: 1.14; background: var(--journal-image) center / cover no-repeat; box-shadow: 0 24px 55px rgba(0,0,0,.28); transition: transform .6s cubic-bezier(.2,.65,.25,1), filter .4s; }
-.journal-card:hover .journal-image { transform: translateY(-5px) scale(1.015); filter: brightness(1.05); }
-.post-meta { margin: 17px 0 10px; overflow: hidden; color: #b6c2ad; font-family: var(--mono); font-size: 8px; letter-spacing: .17em; text-overflow: ellipsis; text-transform: uppercase; white-space: nowrap; }
-.journal-card h3 { display: -webkit-box; max-width: 315px; height: 50px; margin: 0 0 18px; overflow: hidden; color: var(--cream); font: 22px/1.12 var(--serif); -webkit-box-orient: vertical; -webkit-line-clamp: 2; }
-.journal-card-link { display: block; width: 100%; padding: 0; border: 0; background: none; color: inherit; font: inherit; text-align: left; cursor: pointer; }
-.journal-front .journal-cta { display: inline-flex; gap: 25px; padding-bottom: 5px; border-bottom: 1px solid rgba(241,234,220,.55); color: rgba(241,234,220,.82); font-size: 8px; font-weight: 600; letter-spacing: .15em; text-transform: uppercase; }
-
 .contact { position: relative; min-height: 780px; display: flex; flex-direction: column; justify-content: space-between; padding: 130px 4.5vw 35px; color: var(--cream); background: var(--coffee); overflow: hidden; }
 .contact::before { content: ""; position: absolute; width: 42vw; height: 42vw; max-width: 650px; max-height: 650px; right: -8vw; top: -14vw; border: 1px solid rgba(241,234,220,.11); border-radius: 50%; box-shadow: 0 0 0 90px rgba(241,234,220,.025), 0 0 0 180px rgba(241,234,220,.02); }
 .contact-inner { position: relative; z-index: 2; margin: auto; text-align: center; }
@@ -328,4 +283,56 @@ footer div { display: flex; gap: 25px; font-size: 9px; letter-spacing: .12em; te
   .postcard-lightbox-inner { grid-template-columns: 1fr; max-height: 100vh; height: 100%; overflow-y: auto; }
   .postcard-lightbox-media img { max-height: 62vh; }
   .postcard-lightbox-text { padding: 28px 24px 40px; }
+}
+
+/* Chapter captions removed: let the writing lead each section. */
+.intro-body { margin-top: 0; }
+[data-copy] { overflow-wrap: break-word; }
+
+/* Collections: an editorial grid, framed by paper and deep green. */
+.collection-section { position: relative; }
+.collaborations-section { background: var(--paper); color: var(--ink); }
+.postcards-section { background: var(--green); color: var(--cream); }
+.collection-heading { display: flex; align-items: flex-end; justify-content: space-between; gap: 44px; margin-bottom: 52px; }
+.collection-heading > div { max-width: 720px; }
+.collection-heading h2 { margin: 0 0 22px; font: 400 clamp(44px, 5.5vw, 82px)/1.02 var(--serif); letter-spacing: -.04em; }
+.collection-heading p { max-width: 52ch; margin: 0; font: 18px/1.6 var(--serif); opacity: .8; }
+.collection-all { flex-shrink: 0; display: inline-flex; align-items: center; gap: 30px; padding: 12px 0; border-bottom: 1px solid currentColor; font: 500 13px/1.4 var(--sans); }
+.collection-all span { font-size: 20px; }
+.collection-grid { display: grid; grid-template-columns: repeat(3, minmax(0,1fr)); gap: 52px 28px; }
+.collection-card { min-width: 0; }
+.collection-card-link { display: block; width: 100%; padding: 0; border: 0; background: transparent; color: inherit; text-align: left; font: inherit; cursor: pointer; }
+.collection-media { position: relative; aspect-ratio: 4/5; overflow: hidden; background: rgba(127,127,127,.15); }
+.collection-media img { display: block; width: 100%; height: 100%; object-fit: cover; transition: transform .3s; }
+.collection-card-link:hover img { transform: scale(1.025); }
+.collection-open { position: absolute; right: 14px; bottom: 14px; display: grid; place-items: center; width: 40px; height: 40px; background: var(--paper); color: var(--ink); font-size: 20px; }
+.collection-card-copy { padding-top: 20px; }
+.collection-meta { margin: 0 0 10px; font: 12px/1.5 var(--sans); opacity: .72; }
+.collection-card h3 { margin: 0 0 12px; font: 400 32px/1.1 var(--serif); letter-spacing: -.025em; overflow-wrap: anywhere; }
+.collection-note { display: -webkit-box; -webkit-line-clamp: 2; -webkit-box-orient: vertical; overflow: hidden; margin: 0; font: 17px/1.5 var(--serif); opacity: .8; }
+.collection-empty { grid-column: 1/-1; padding: 40px 0; border-top: 1px solid currentColor; border-bottom: 1px solid currentColor; }
+.collection-empty h3 { margin: 0 0 12px; font: 400 30px/1.2 var(--serif); }
+.collection-empty p { margin: 0 0 24px; font: 18px/1.6 var(--serif); opacity: .75; }
+.archive-page { background: var(--paper); color: var(--ink); }
+.archive-page .site-header { background: var(--paper); color: var(--ink); }
+.archive-section { padding-top: 145px; min-height: 70vh; }
+.archive-back { display: inline-block; margin-bottom: 40px; font: 13px/1.5 var(--sans); }
+.archive-heading { margin-bottom: 42px; }
+.archive-heading h1 { margin: 0 0 20px; font: 400 clamp(58px,8vw,112px)/1 var(--serif); letter-spacing: -.055em; }
+.archive-heading p { margin: 0; font: 20px/1.5 var(--serif); }
+.archive-toolbar { display: flex; align-items: center; gap: 18px; border-top: 1px solid var(--line); padding: 24px 0 40px; flex-wrap: wrap; }
+.archive-toolbar label, .archive-toolbar p { font: 13px/1.5 var(--sans); }
+.archive-toolbar input { width: min(360px,100%); border: 1px solid var(--line); padding: 12px 14px; background: transparent; color: inherit; font: 16px/1.5 var(--sans); border-radius: 0; }
+.archive-toolbar p { margin: 0 0 0 auto; }
+.archive-footer { background: var(--green); color: var(--cream); padding: 35px 4.5vw; }
+.archive-page .menu-toggle span { background: var(--ink); }
+@media (min-width: 1100px) { .postcard-preview .collection-card:nth-child(2) { padding-top: 50px; } .postcard-preview .collection-card:nth-child(3) { padding-top: 100px; } }
+@media (max-width: 1000px) { .collection-heading { align-items: flex-start; flex-direction: column; gap: 24px; } .collection-grid { grid-template-columns: repeat(2,minmax(0,1fr)); } .collection-grid[data-preview] .collection-card:last-child:nth-child(3) { grid-column: 1/-1; max-width: calc(50% - 14px); } }
+@media (max-width: 600px) { .collection-grid { grid-template-columns: 1fr; gap: 40px; } .collection-grid[data-preview] .collection-card:last-child:nth-child(3) { grid-column: auto; max-width: none; } .collection-heading { margin-bottom: 36px; } .collection-heading h2 { font-size: 48px; } .collection-media { aspect-ratio: 5/6; } .archive-section { padding-top: 110px; } .archive-toolbar { gap: 12px; } .archive-toolbar label { width: 100%; } .archive-toolbar input { width: 100%; } .archive-toolbar p { margin-left: 0; } }
+@media (prefers-reduced-motion: reduce) { .collection-media img { transition: none; } }
+
+/* Keep collection navigation and long page titles usable on narrow phones. */
+footer div { flex-wrap: wrap; }
+@media (max-width: 600px) {
+  .archive-heading h1 { font-size: clamp(42px, 11vw, 58px); }
 }

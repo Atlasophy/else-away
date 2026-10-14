@@ -15,8 +15,12 @@ export async function readContent(db) {
     imagesByCard.get(row.postcard_id).push(row.image);
   }
 
+  const details = Object.fromEntries(site.results.map(row => [row.key, row.value]));
+  const collaborations = JSON.parse(details.__collaborations ?? '[]');
+  delete details.__collaborations;
   return {
-    site: Object.fromEntries(site.results.map(row => [row.key, row.value])),
+    site: details,
+    collaborations,
     postcards: postcards.results.map(row => ({
       city: row.city,
       country: row.country,
@@ -57,7 +61,27 @@ export function validateContent(payload) {
     }
   }
 
+  if (payload.collaborations !== undefined) {
+    if (!Array.isArray(payload.collaborations)) errors.push('Collaborations must be a list.');
+    else for (const [index, project] of payload.collaborations.entries()) {
+      if (!project || typeof project !== 'object' || Array.isArray(project)) {
+        errors.push(`Collaboration ${index + 1} must be an object.`);
+        continue;
+      }
+      if (typeof project.title !== 'string' || !project.title.trim()) errors.push(`Collaboration ${index + 1} needs a title.`);
+      for (const [field, limit] of [['title', 160], ['partner', 160], ['location', 160], ['year', 120], ['description', 5000]]) {
+        if (project[field] != null && (typeof project[field] !== 'string' || project[field].length > limit)) errors.push(`Collaboration ${index + 1} has an invalid ${field}.`);
+      }
+      if (!Array.isArray(project.images) || !project.images.length) errors.push(`Collaboration ${index + 1} needs a photograph.`);
+      else if (project.images.some(image => typeof image !== 'string' || !/^(?:https:\/\/|\/|assets\/)/i.test(image))) errors.push(`Collaboration ${index + 1} has an invalid photograph address.`);
+    }
+  }
   const details = payload.site ?? {};
+  if (Object.hasOwn(details, '__collaborations')) errors.push('Reserved site detail.');
+  for (const [key, value] of Object.entries(details)) {
+    if (typeof value !== 'string') errors.push(`Site detail "${key}" must be text.`);
+    else if (value.length > 5000) errors.push(`Site detail "${key}" is too long (maximum 5,000 characters).`);
+  }
   if (details.email && !/^[^\s@]+@[^\s@]+\.[^\s@]+$/.test(String(details.email).trim())) {
     errors.push('The contact email address is not valid.');
   }
@@ -76,9 +100,15 @@ export async function writeContent(db, payload) {
   const statements = [
     db.prepare('DELETE FROM postcard_images'),
     db.prepare('DELETE FROM postcards'),
-    db.prepare('DELETE FROM site'),
+    db.prepare("DELETE FROM site WHERE key != '__collaborations'"),
   ];
 
+  // Keep the collection in the existing key/value store, so established
+  // databases need no migration. Older dashboard payloads preserve it.
+  if (payload.collaborations !== undefined) {
+    statements.push(db.prepare('INSERT OR REPLACE INTO site (key, value) VALUES (?, ?)')
+      .bind('__collaborations', JSON.stringify(payload.collaborations)));
+  }
   for (const [key, value] of Object.entries(payload.site ?? {})) {
     statements.push(db.prepare('INSERT INTO site (key, value) VALUES (?, ?)').bind(key, String(value)));
   }

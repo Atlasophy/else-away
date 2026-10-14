@@ -33,6 +33,7 @@ lines = [
 
 for key, value in data['site'].items():
     lines.append(f'INSERT INTO site (key, value) VALUES ({q(key)}, {q(value)});')
+lines.append(f"INSERT INTO site (key, value) VALUES ('__collaborations', {q(json.dumps(data.get('collaborations', []), ensure_ascii=False))});")
 lines.append('')
 
 for index, card in enumerate(data['postcards']):

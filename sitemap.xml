@@ -5,4 +5,6 @@
     <changefreq>monthly</changefreq>
     <priority>1.0</priority>
   </url>
+  <url><loc>https://elseaway.com/postcards/</loc><changefreq>monthly</changefreq></url>
+  <url><loc>https://elseaway.com/collaborations/</loc><changefreq>monthly</changefreq></url>
 </urlset>

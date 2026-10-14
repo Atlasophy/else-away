@@ -137,3 +137,22 @@ button { font: inherit; color: inherit; cursor: pointer; }
 @media (prefers-reduced-motion: reduce) {
   * { transition-duration: .01ms !important; animation-duration: .01ms !important; }
 }
+
+/* Writing uses a single, quiet column with clear section boundaries. */
+.writing-editor { max-width: 760px; }
+.writing-section { padding: 28px 0 34px; border-top: 1px solid var(--line); }
+.writing-section h2 { margin: 0 0 22px; font-size: 25px; }
+.writing-section .fields { gap: 22px; }
+.field label { font: 500 13px/1.4 var(--sans); letter-spacing: 0; text-transform: none; color: var(--ink); }
+.writing-section textarea { font: 16px/1.6 var(--sans); padding: 12px 14px; }
+.tab { font: 500 13px/1.3 var(--sans); letter-spacing: 0; text-transform: none; border-radius: 3px; white-space: nowrap; min-height: 40px; }
+.publish { border-radius: 3px; font: 500 13px/1.3 var(--sans); letter-spacing: 0; text-transform: none; }
+.sr-only { position: absolute; width: 1px; height: 1px; padding: 0; overflow: hidden; clip: rect(0,0,0,0); white-space: nowrap; }
+@media (max-width: 540px) {
+  .bar-actions { gap: 10px; }
+  .status { max-width: 145px; font-size: 11px; }
+  .publish { padding: 10px 14px; }
+  .workspace { padding: 28px 16px 80px; }
+}
+
+.collection-editor-empty { padding-top: 24px; color: var(--muted); }

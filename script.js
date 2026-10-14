@@ -27,15 +27,33 @@ document.querySelectorAll('[data-credit]').forEach(element => {
   element.textContent = String(site.credit ?? '').trim() || 'By Atlasophy';
 });
 
+/* Published writing is always rendered as text, never HTML. Existing markup
+   stays intact until its text is edited; line breaks remain editable. */
+for (const group of window.ELSE_AWAY_COPY ?? []) {
+  for (const field of group.fields) {
+    const value = site[field.key];
+    if (typeof value !== 'string' || value === field.default) continue;
+    document.querySelectorAll(`[data-copy="${field.key}"]`).forEach(element => {
+      const lines = value.split('\n');
+      element.replaceChildren();
+      lines.forEach((line, index) => {
+        if (index) element.append(document.createElement('br'));
+        element.append(document.createTextNode(line));
+      });
+      if (field.key === 'aboutSignature') element.setAttribute('aria-label', value);
+    });
+  }
+}
+
 /* ------------------------------------------------------------- postcards */
 /* Each postcard is a small place: a city, a country, roughly when it was,
    a handful of photographs, and a note. The rail shows a cover card that
    flips to a written side on hover; opening it goes to the lightbox, which
    is the only place all of its photographs live at once. */
-const placeLabel = card => [card.city, card.country].filter(Boolean).join(', ') || 'Somewhere else';
+const placeLabel = card => card.title || [card.city, card.country].filter(Boolean).join(', ') || 'Somewhere else';
 const metaLabel = card => {
   const count = (card.images ?? []).length;
-  const bits = [card.time, count ? `${count} photograph${count === 1 ? '' : 's'}` : null].filter(Boolean);
+  const bits = [card.partner, card.location, card.year ?? card.time, count ? `${count} photograph${count === 1 ? '' : 's'}` : null].filter(Boolean);
   return bits.join(' · ');
 };
 const escapeHTML = value => String(value ?? '').replace(/[&<>"']/g, character => ({
@@ -45,178 +63,56 @@ const safeImageUrl = value => {
   const candidate = String(value ?? '').trim();
   if (!candidate) return '';
   try {
-    const url = new URL(candidate, document.baseURI);
+    const url = new URL(candidate.startsWith('assets/') ? `/${candidate}` : candidate, document.baseURI);
     return ['http:', 'https:'].includes(url.protocol) ? url.href : '';
   } catch {
     return '';
   }
 };
 
-const journalSet = document.querySelector('[data-journal-set]');
 const postcards = content.postcards ?? [];
 
-if (journalSet) {
-  journalSet.innerHTML = postcards.length ? postcards.map((card, index) => `
-    <article class="journal-card" role="group" aria-roledescription="slide" aria-label="${escapeHTML(`${index + 1} of ${postcards.length}: ${placeLabel(card)}`)}">
-      <button type="button" class="journal-card-link" data-postcard-open="${index}" aria-haspopup="dialog" aria-label="${escapeHTML(`Open postcard from ${placeLabel(card)}${metaLabel(card) ? `, ${metaLabel(card)}` : ''}`)}">
-        <div class="journal-card-inner">
-          <div class="journal-front">
-            <div class="journal-image" data-postcard-cover="${index}" aria-hidden="true"></div>
-            <p class="post-meta">${escapeHTML(metaLabel(card))}</p>
-            <h3>${escapeHTML(placeLabel(card))}</h3>
-            <span class="journal-cta">View photographs <span aria-hidden="true">→</span></span>
-          </div>
-          <div class="journal-back">
-            <span class="journal-postmark" aria-hidden="true">${escapeHTML(card.country || card.city || '')}${card.time ? `<br>${escapeHTML(card.time)}` : ''}</span>
-            <p class="journal-note">${escapeHTML(card.note)}</p>
-            <span class="journal-cta">View photographs <span aria-hidden="true">→</span></span>
-          </div>
-        </div>
-      </button>
-    </article>`).join('') : '<p class="journal-empty">New postcards are on the way.</p>';
-  journalSet.querySelectorAll('[data-postcard-cover]').forEach(cover => {
-    const card = postcards[Number(cover.dataset.postcardCover)];
-    const url = safeImageUrl(card?.images?.[0]);
-    if (url) cover.style.setProperty('--journal-image', `url("${url}")`);
-  });
+const collaborations = content.collaborations ?? [];
+const entries = [...postcards, ...collaborations];
+const collectionHost = document.querySelector('[data-collection]:not([data-preview])');
+let requestedEntry = null;
+
+function renderCollection(host, query = '') {
+  const kind = host.dataset.collection;
+  const list = kind === 'collaborations' ? collaborations : postcards;
+  const preview = host.hasAttribute('data-preview');
+  const matches = list.map((card, index) => ({card, index})).filter(({card}) =>
+    Object.values(card).filter(value => typeof value === 'string').join(' ').toLocaleLowerCase().includes(query.toLocaleLowerCase().trim()));
+  const shown = preview ? matches.slice(0, 3) : matches;
+  host.innerHTML = shown.length ? shown.map(({card, index}) => {
+    const entryIndex = kind === 'collaborations' ? postcards.length + index : index;
+    const title = placeLabel(card);
+    const subtitle = kind === 'collaborations' ? [card.partner, card.location, card.year].filter(Boolean).join(' · ') : [card.country, card.time].filter(Boolean).join(' · ');
+    const src = safeImageUrl(card.images?.[0]);
+    const inner = `<div class="collection-media">${src ? `<img src="${escapeHTML(src)}" alt="${escapeHTML(title)}" width="960" height="1200" loading="lazy">` : ''}<span class="collection-open" aria-hidden="true">↗</span></div>
+      <div class="collection-card-copy"><p class="collection-meta">${escapeHTML(subtitle)}</p><h3>${escapeHTML(title)}</h3><p class="collection-note">${escapeHTML(card.description ?? card.note)}</p></div>`;
+    return `<article class="collection-card">${preview
+      ? `<a href="/${kind}/?entry=${index}" class="collection-card-link">${inner}</a>`
+      : `<button type="button" class="collection-card-link" data-postcard-open="${entryIndex}" aria-haspopup="dialog" aria-label="${escapeHTML('Open '+title)}">${inner}</button>`}</article>`;
+  }).join('') : `<div class="collection-empty"><h3>${query.trim() ? 'No matching stories' : kind === 'collaborations' ? 'The next story starts here.' : 'New postcards are on the way.'}</h3><p>${query.trim() ? 'Try another place, partner, or keyword.' : kind === 'collaborations' ? 'New collaborations will appear here as their stories are published.' : 'Come back soon for more places and moments.'}</p>${kind === 'collaborations' && !query.trim() ? `<a class="text-link" href="${mailto}">Let’s work together <span aria-hidden="true">↗</span></a>` : ''}</div>`;
+  if (!preview) {
+    const status = document.querySelector('[data-collection-status]');
+    if (status) status.textContent = `${matches.length} ${kind === 'collaborations' ? 'collaboration' : 'postcard'}${matches.length === 1 ? '' : 's'}`;
+  }
+}
+document.querySelectorAll('[data-collection]').forEach(host => renderCollection(host));
+document.querySelector('[data-collection-search]')?.addEventListener('input', event => renderCollection(collectionHost, event.target.value));
+if (collectionHost) {
+  const query = new URLSearchParams(location.search).get('entry');
+  const index = query !== null && /^\d+$/.test(query) ? Number(query) : -1;
+  const list = collectionHost.dataset.collection === 'collaborations' ? collaborations : postcards;
+  if (list[index]) requestedEntry = collectionHost.dataset.collection === 'collaborations' ? postcards.length + index : index;
 }
 
-const journalTrack = document.querySelector('[data-journal-track]');
-const journalRail = document.querySelector('.journal-rail');
-const journalPrev = document.querySelector('[data-journal-prev]');
-const journalNext = document.querySelector('[data-journal-next]');
-const journalControls = document.querySelector('.journal-controls');
-const journalCurrent = document.querySelector('[data-journal-current]');
-const journalTotal = document.querySelector('[data-journal-total]');
-const journalAnnouncement = document.querySelector('[data-journal-announcement]');
-const journalCards = journalSet ? [...journalSet.querySelectorAll('.journal-card')] : [];
-
-/* One stable horizontal rail replaces the duplicated drifting loop. Native
-   scrolling handles touch and trackpads; the controls, keyboard and mouse
-   drag all move the same scroll position and settle on the same card lanes. */
-if (journalRail && journalTrack) {
-  let journalIndex = 0;
-  let scrollFrame = 0;
-  let announceTimer = 0;
-  let dragState = null;
-  let suppressPostcardClick = false;
-  let programmaticScroll = false;
-
-  journalRail.classList.toggle('is-empty', !journalCards.length);
-  journalControls.hidden = !journalCards.length;
-
-  function cardOffset(index) {
-    if (!journalCards.length) return 0;
-    return journalCards[Math.max(0, Math.min(index, journalCards.length - 1))].offsetLeft - journalCards[0].offsetLeft;
-  }
-
-  function nearestCard() {
-    if (!journalCards.length) return 0;
-    return journalCards.reduce((nearest, card, index) => (
-      Math.abs(cardOffset(index) - journalRail.scrollLeft) < Math.abs(cardOffset(nearest) - journalRail.scrollLeft)
-        ? index
-        : nearest
-    ), 0);
-  }
-
-  function updateJournalControls(announce = false, index = nearestCard()) {
-    journalIndex = index;
-    const total = journalCards.length;
-    journalCurrent.textContent = total ? String(journalIndex + 1) : '0';
-    journalTotal.textContent = String(total);
-    journalPrev.disabled = journalIndex === 0 || total < 2;
-    journalNext.disabled = journalIndex >= total - 1 || total < 2;
-    if (announce) {
-      const card = postcards[journalIndex];
-      journalAnnouncement.textContent = total
-        ? `Postcard ${journalIndex + 1} of ${total}: ${placeLabel(card)}`
-        : 'No postcards';
-    }
-  }
-
-  function showCard(index) {
-    if (!journalCards.length) return;
-    journalIndex = Math.max(0, Math.min(index, journalCards.length - 1));
-    programmaticScroll = true;
-    journalRail.scrollTo({
-      left: cardOffset(journalIndex),
-      behavior: reduceMotion.matches ? 'auto' : 'smooth',
-    });
-    updateJournalControls(true, journalIndex);
-  }
-
-  journalPrev.addEventListener('click', () => showCard(journalIndex - 1));
-  journalNext.addEventListener('click', () => showCard(journalIndex + 1));
-  journalRail.addEventListener('keydown', event => {
-    const directions = { ArrowLeft: -1, ArrowRight: 1 };
-    if (event.key in directions) {
-      event.preventDefault();
-      showCard(nearestCard() + directions[event.key]);
-    } else if (event.key === 'Home') {
-      event.preventDefault();
-      showCard(0);
-    } else if (event.key === 'End') {
-      event.preventDefault();
-      showCard(journalCards.length - 1);
-    }
-  });
-
-  journalRail.addEventListener('scroll', () => {
-    if (scrollFrame) return;
-    scrollFrame = requestAnimationFrame(() => {
-      scrollFrame = 0;
-      if (!programmaticScroll) updateJournalControls();
-      clearTimeout(announceTimer);
-      announceTimer = setTimeout(() => {
-        programmaticScroll = false;
-        updateJournalControls(true);
-      }, 180);
-    });
-  }, { passive: true });
-
-  journalRail.addEventListener('pointerdown', event => {
-    programmaticScroll = false;
-    if (event.pointerType !== 'mouse' || event.button !== 0) return;
-    dragState = { id: event.pointerId, x: event.clientX, left: journalRail.scrollLeft, moved: false, captured: false };
-  });
-  journalRail.addEventListener('pointermove', event => {
-    if (!dragState || dragState.id !== event.pointerId) return;
-    const distance = event.clientX - dragState.x;
-    if (Math.abs(distance) > 5 && !dragState.moved) {
-      dragState.moved = true;
-      dragState.captured = true;
-      journalRail.setPointerCapture(event.pointerId);
-      journalRail.classList.add('is-dragging');
-    }
-    if (dragState.moved) {
-      event.preventDefault();
-      journalRail.scrollLeft = dragState.left - distance;
-    }
-  });
-  const finishDrag = event => {
-    if (!dragState || dragState.id !== event.pointerId) return;
-    suppressPostcardClick = dragState.moved;
-    const captured = dragState.captured;
-    dragState = null;
-    journalRail.classList.remove('is-dragging');
-    if (captured && journalRail.hasPointerCapture(event.pointerId)) journalRail.releasePointerCapture(event.pointerId);
-    if (suppressPostcardClick) setTimeout(() => { suppressPostcardClick = false; }, 0);
-  };
-  journalRail.addEventListener('pointerup', finishDrag);
-  journalRail.addEventListener('pointercancel', finishDrag);
-  journalRail.addEventListener('click', event => {
-    if (!suppressPostcardClick) return;
-    event.preventDefault();
-    event.stopPropagation();
-  }, true);
-  journalRail.addEventListener('wheel', () => { programmaticScroll = false; }, { passive: true });
-  window.addEventListener('resize', () => updateJournalControls(), { passive: true });
-  updateJournalControls(true);
-}
 
 /* ------------------------------------------------------- postcard lightbox */
 const lightbox = document.querySelector('[data-postcard-lightbox]');
-if (lightbox && postcards.length) {
+if (lightbox && entries.length) {
   const image = lightbox.querySelector('[data-postcard-lightbox-image]');
   const meta = lightbox.querySelector('[data-postcard-lightbox-meta]');
   const place = lightbox.querySelector('[data-postcard-lightbox-place]');
@@ -228,7 +124,7 @@ if (lightbox && postcards.length) {
   let openPhoto = 0;
   let lastFocused = null;
   const headerRegion = document.querySelector('[data-header]');
-  const backgroundRegions = [...document.querySelectorAll('main > :not([data-postcard-lightbox])')];
+  const backgroundRegions = [...document.querySelectorAll('main > :not([data-postcard-lightbox]), .archive-footer, [data-mobile-menu]')];
 
   function renderPhoto() {
     const photos = openCard.images ?? [];
@@ -243,13 +139,13 @@ if (lightbox && postcards.length) {
   }
 
   function openLightbox(index, trigger) {
-    openCard = postcards[index];
+    openCard = entries[index];
     if (!openCard) return;
     openPhoto = 0;
     lastFocused = trigger ?? document.activeElement;
     meta.textContent = metaLabel(openCard);
     place.textContent = placeLabel(openCard);
-    note.textContent = openCard.note ?? '';
+    note.textContent = openCard.description ?? openCard.note ?? '';
     renderPhoto();
     lightbox.hidden = false;
     document.body.style.overflow = 'hidden';
@@ -281,13 +177,6 @@ if (lightbox && postcards.length) {
       openLightbox(Number(clickedPostcard.dataset.postcardOpen), clickedPostcard);
     }
   });
-  journalSet?.addEventListener('keydown', event => {
-    if (event.repeat || !['Enter', ' '].includes(event.key)) return;
-    const trigger = event.target.closest('[data-postcard-open]');
-    if (!trigger) return;
-    event.preventDefault();
-    openLightbox(Number(trigger.dataset.postcardOpen), trigger);
-  });
   lightbox.querySelectorAll('[data-postcard-lightbox-close]').forEach(el => el.addEventListener('click', closeLightbox));
   prevButton.addEventListener('click', () => step(-1));
   nextButton.addEventListener('click', () => step(1));
@@ -309,6 +198,11 @@ if (lightbox && postcards.length) {
       }
     }
   });
+  if (requestedEntry !== null) {
+    const trigger = document.querySelector(`[data-postcard-open="${requestedEntry}"]`);
+    openLightbox(requestedEntry, trigger);
+  }
+
 }
 
 /* Dust in the beam. Only in the dark sections, and never when motion is
