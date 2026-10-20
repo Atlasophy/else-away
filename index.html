@@ -29,6 +29,13 @@
   <script src="/content.js?v=20260803.1" defer></script>
   <script src="/copy-fields.js?v=20261014.2" defer></script>
   <script src="/script.js?v=20261014.2" defer></script>
+  <!-- Temporary dedication: revert this change to restore the original hero exactly. -->
+  <style>
+    .hero h1.temporary-dedication { font-size: clamp(48px, 8vw, 96px); line-height: .98; letter-spacing: -.025em; }
+    .hero .temporary-signature { margin: 28px 0 0 8px; color: var(--paper); font-size: clamp(38px, 5vw, 52px); }
+    .hero .temporary-signature span { right: -12px; height: 15px; border-bottom-width: 1px; }
+  </style>
+  <!-- End temporary dedication styles. -->
 </head>
 <body class="home-page">
   <a class="skip-link" href="#main">Skip to content</a>
@@ -64,8 +71,8 @@
       <div class="hero-shade"></div>
       <div class="hero-content reveal">
         <p class="eyebrow light" data-copy="heroEyebrow">elseaway · A visual journal by Yaren</p>
-        <h1 id="hero-title" data-copy="heroTitle">Stories from<br><em>elsewhere.</em></h1>
-        <p class="hero-copy" data-copy="heroCopy">Photographs and visual stories that make a place<br class="desktop-only"> feel like somewhere you’ve already missed.</p>
+        <h1 id="hero-title" class="temporary-dedication" lang="tr">SENI<br>OZLEDIM</h1>
+        <p class="signature temporary-signature">Atlas<span aria-hidden="true"></span></p>
       </div>
       <a class="hero-scroll" href="#intro" aria-label="Scroll to discover">
         <span>Scroll to discover</span><i aria-hidden="true">↓</i>
