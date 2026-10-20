@@ -37,36 +37,21 @@
     .hero .temporary-signature { margin: 24px 0 0 8px; color: var(--paper); font-size: clamp(114px, 12vw, 156px); }
     .hero .temporary-signature span { right: -12px; height: 15px; border-bottom-width: 1px; }
     .dedication-translations { position: absolute; inset: 0; z-index: 3; pointer-events: none; }
-    .dedication-note { position: absolute; margin: 0; color: var(--green-deep); font: italic 20px/1.4 var(--serif); white-space: nowrap; text-shadow: 0 1px 5px rgba(244,238,225,.8); }
-    .dedication-note:nth-child(1) { top: 20%; left: 65%; transform: rotate(-7deg); }
-    .dedication-note:nth-child(2) { top: 29%; right: 14%; transform: rotate(6deg); }
-    .dedication-note:nth-child(3) { top: 30%; left: 57%; transform: rotate(-4deg); }
-    .dedication-note:nth-child(n+4):nth-child(-n+6), .dedication-note:nth-child(n+10) { color: var(--paper); text-shadow: 0 2px 5px rgba(8,18,12,.95); }
-    .dedication-note:nth-child(4) { bottom: 18%; right: 8%; transform: rotate(7deg); }
-    .dedication-note:nth-child(5) { bottom: 10%; left: 50%; transform: rotate(-5deg); }
-    .dedication-note:nth-child(6) { bottom: 6%; right: 18%; transform: rotate(3deg); }
-    .dedication-note:nth-child(7) { top: 15%; right: 4%; transform: rotate(4deg); }
-    .dedication-note:nth-child(8) { top: 23%; right: 4%; transform: rotate(-5deg); }
-    .dedication-note:nth-child(9) { top: 34%; left: 72%; transform: rotate(3deg); }
-    .dedication-note:nth-child(10) { bottom: 16%; left: 44%; transform: rotate(-6deg); }
-    .dedication-note:nth-child(11) { bottom: 14%; right: 23%; transform: rotate(4deg); }
-    .dedication-note:nth-child(12) { bottom: 6%; left: 37%; transform: rotate(-3deg); }
+    .dedication-cloud { position: absolute; display: flex; flex-wrap: wrap; align-items: center; justify-content: space-between; gap: 16px 24px; }
+    .dedication-cloud--sky { top: 125px; left: 52%; right: 4%; }
+    .dedication-cloud--earth { bottom: 76px; left: 35%; right: 4%; }
+    .dedication-note { margin: 0; color: var(--green-deep); font: italic 17px/1.45 var(--serif); white-space: nowrap; text-shadow: 0 1px 5px rgba(244,238,225,.8); }
+    .dedication-note:nth-child(3n+1) { transform: rotate(-4deg); }
+    .dedication-note:nth-child(3n+2) { transform: rotate(3deg); }
+    .dedication-cloud--earth .dedication-note { color: var(--paper); text-shadow: 0 2px 5px rgba(8,18,12,.95); }
     @media (max-width: 900px) {
-      .temporary-hero .hero-content { width: 90%; padding-top: 110px; padding-bottom: 110px; }
+      .temporary-hero .hero-content { width: 90%; padding-top: 360px; padding-bottom: 380px; }
       .hero h1.temporary-dedication { font-size: 20.5vw; line-height: .9; }
-      .dedication-note { font-size: 15px; }
-      .dedication-note:nth-child(1) { top: 13%; left: 7%; }
-      .dedication-note:nth-child(2) { top: 14%; right: 5%; }
-      .dedication-note:nth-child(3) { top: 19%; left: 10%; }
-      .dedication-note:nth-child(4) { bottom: 22%; right: auto; left: 8%; }
-      .dedication-note:nth-child(5) { bottom: 16%; right: auto; left: 8%; }
-      .dedication-note:nth-child(6) { bottom: 10%; right: auto; left: 7%; }
-      .dedication-note:nth-child(7) { top: 20%; right: 6%; }
-      .dedication-note:nth-child(8) { top: 25%; right: auto; left: 6%; }
-      .dedication-note:nth-child(9) { top: 26%; right: 7%; left: auto; }
-      .dedication-note:nth-child(10) { bottom: 23%; right: 7%; left: auto; }
-      .dedication-note:nth-child(11) { bottom: 16%; right: 9%; }
-      .dedication-note:nth-child(12) { bottom: 9%; right: 5%; left: auto; }
+      .dedication-cloud { left: 7%; right: 7%; display: grid; grid-template-columns: repeat(2,minmax(0,1fr)); gap: 9px 15px; }
+      .dedication-cloud--sky { top: 108px; }
+      .dedication-cloud--earth { bottom: 84px; }
+      .dedication-note { font-size: 14px; white-space: normal; overflow-wrap: anywhere; }
+      .dedication-note:nth-child(even) { justify-self: end; text-align: end; }
     }
   </style>
   <!-- End temporary dedication styles. -->
@@ -108,19 +93,41 @@
         <h1 id="hero-title" class="temporary-dedication" lang="tr">SENİ<br>ÖZLEDİM</h1>
         <p class="signature temporary-signature">Atlas<span aria-hidden="true"></span></p>
       </div>
-      <div class="dedication-translations" role="group" aria-label="I miss you, in other languages">
-        <p class="dedication-note" lang="en">I miss you</p>
-        <p class="dedication-note" lang="fr">Tu me manques</p>
-        <p class="dedication-note" lang="es">Te extraño</p>
-        <p class="dedication-note" lang="it">Mi manchi</p>
-        <p class="dedication-note" lang="pl">Tęsknię za Tobą</p>
-        <p class="dedication-note" lang="ru">Я скучаю по тебе</p>
-        <p class="dedication-note" lang="de">Ich vermisse dich</p>
-        <p class="dedication-note" lang="pt">Sinto a tua falta</p>
-        <p class="dedication-note" lang="nl">Ik mis je</p>
-        <p class="dedication-note" lang="uz">Seni sogʻindim</p>
-        <p class="dedication-note" lang="ar" dir="rtl">أشتاق إليك</p>
-        <p class="dedication-note" lang="uk">Я сумую за тобою</p>
+      <div class="dedication-translations" role="group" aria-label="I miss you, in thirty languages">
+        <div class="dedication-cloud dedication-cloud--sky">
+          <p class="dedication-note" lang="en">I miss you</p>
+          <p class="dedication-note" lang="fr">Tu me manques</p>
+          <p class="dedication-note" lang="es">Te extraño</p>
+          <p class="dedication-note" lang="de">Ich vermisse dich</p>
+          <p class="dedication-note" lang="nl">Ik mis je</p>
+          <p class="dedication-note" lang="it">Mi manchi</p>
+          <p class="dedication-note" lang="pt">Sinto a tua falta</p>
+          <p class="dedication-note" lang="ro">Mi-e dor de tine</p>
+          <p class="dedication-note" lang="sv">Jag saknar dig</p>
+          <p class="dedication-note" lang="no">Jeg savner deg</p>
+          <p class="dedication-note" lang="da">Jeg savner dig</p>
+          <p class="dedication-note" lang="fi">Kaipaan sinua</p>
+          <p class="dedication-note" lang="is">Ég sakna þín</p>
+          <p class="dedication-note" lang="cs">Chybíš mi</p>
+          <p class="dedication-note" lang="sk">Chýbaš mi</p>
+        </div>
+        <div class="dedication-cloud dedication-cloud--earth">
+          <p class="dedication-note" lang="pl">Tęsknię za Tobą</p>
+          <p class="dedication-note" lang="ru">Я скучаю по тебе</p>
+          <p class="dedication-note" lang="uz">Seni sogʻindim</p>
+          <p class="dedication-note" lang="ar" dir="rtl">أشتاق إليك</p>
+          <p class="dedication-note" lang="uk">Я сумую за тобою</p>
+          <p class="dedication-note" lang="hu">Hiányzol</p>
+          <p class="dedication-note" lang="hr">Nedostaješ mi</p>
+          <p class="dedication-note" lang="sr">Недостајеш ми</p>
+          <p class="dedication-note" lang="bg">Липсваш ми</p>
+          <p class="dedication-note" lang="el">Μου λείπεις</p>
+          <p class="dedication-note" lang="he" dir="rtl">אני מתגעגע אלייך</p>
+          <p class="dedication-note" lang="fa" dir="rtl">دلم برات تنگ شده</p>
+          <p class="dedication-note" lang="hi">मुझे तुम्हारी याद आती है</p>
+          <p class="dedication-note" lang="id">Aku merindukanmu</p>
+          <p class="dedication-note" lang="tl">Miss na kita</p>
+        </div>
       </div>
       <a class="hero-scroll" href="#intro" aria-label="Scroll to discover">
         <span>Scroll to discover</span><i aria-hidden="true">↓</i>
