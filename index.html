@@ -41,20 +41,32 @@
     .dedication-note:nth-child(1) { top: 20%; left: 65%; transform: rotate(-7deg); }
     .dedication-note:nth-child(2) { top: 29%; right: 14%; transform: rotate(6deg); }
     .dedication-note:nth-child(3) { top: 30%; left: 57%; transform: rotate(-4deg); }
-    .dedication-note:nth-child(n+4) { color: var(--paper); text-shadow: 0 2px 5px rgba(8,18,12,.95); }
+    .dedication-note:nth-child(n+4):nth-child(-n+6), .dedication-note:nth-child(n+10) { color: var(--paper); text-shadow: 0 2px 5px rgba(8,18,12,.95); }
     .dedication-note:nth-child(4) { bottom: 18%; right: 8%; transform: rotate(7deg); }
     .dedication-note:nth-child(5) { bottom: 10%; left: 50%; transform: rotate(-5deg); }
     .dedication-note:nth-child(6) { bottom: 6%; right: 18%; transform: rotate(3deg); }
+    .dedication-note:nth-child(7) { top: 15%; right: 4%; transform: rotate(4deg); }
+    .dedication-note:nth-child(8) { top: 23%; right: 4%; transform: rotate(-5deg); }
+    .dedication-note:nth-child(9) { top: 34%; left: 72%; transform: rotate(3deg); }
+    .dedication-note:nth-child(10) { bottom: 16%; left: 44%; transform: rotate(-6deg); }
+    .dedication-note:nth-child(11) { bottom: 14%; right: 23%; transform: rotate(4deg); }
+    .dedication-note:nth-child(12) { bottom: 6%; left: 37%; transform: rotate(-3deg); }
     @media (max-width: 900px) {
       .temporary-hero .hero-content { width: 90%; padding-top: 110px; padding-bottom: 110px; }
       .hero h1.temporary-dedication { font-size: 20.5vw; line-height: .9; }
-      .dedication-note { font-size: 17px; }
-      .dedication-note:nth-child(1) { top: 15%; left: 8%; }
-      .dedication-note:nth-child(2) { top: 22%; right: 6%; }
-      .dedication-note:nth-child(3) { top: 26%; left: 12%; }
-      .dedication-note:nth-child(4) { bottom: 22%; right: auto; left: 11%; }
-      .dedication-note:nth-child(5) { bottom: 16%; right: 7%; left: auto; }
-      .dedication-note:nth-child(6) { bottom: 10%; right: auto; left: 22%; }
+      .dedication-note { font-size: 15px; }
+      .dedication-note:nth-child(1) { top: 13%; left: 7%; }
+      .dedication-note:nth-child(2) { top: 14%; right: 5%; }
+      .dedication-note:nth-child(3) { top: 19%; left: 10%; }
+      .dedication-note:nth-child(4) { bottom: 22%; right: auto; left: 8%; }
+      .dedication-note:nth-child(5) { bottom: 16%; right: auto; left: 8%; }
+      .dedication-note:nth-child(6) { bottom: 10%; right: auto; left: 7%; }
+      .dedication-note:nth-child(7) { top: 20%; right: 6%; }
+      .dedication-note:nth-child(8) { top: 25%; right: auto; left: 6%; }
+      .dedication-note:nth-child(9) { top: 26%; right: 7%; left: auto; }
+      .dedication-note:nth-child(10) { bottom: 23%; right: 7%; left: auto; }
+      .dedication-note:nth-child(11) { bottom: 16%; right: 9%; }
+      .dedication-note:nth-child(12) { bottom: 9%; right: 5%; left: auto; }
     }
   </style>
   <!-- End temporary dedication styles. -->
@@ -103,6 +115,12 @@
         <p class="dedication-note" lang="it">Mi manchi</p>
         <p class="dedication-note" lang="pl">Tęsknię za Tobą</p>
         <p class="dedication-note" lang="ru">Я скучаю по тебе</p>
+        <p class="dedication-note" lang="de">Ich vermisse dich</p>
+        <p class="dedication-note" lang="pt">Sinto a tua falta</p>
+        <p class="dedication-note" lang="nl">Ik mis je</p>
+        <p class="dedication-note" lang="uz">Seni sogʻindim</p>
+        <p class="dedication-note" lang="ar" dir="rtl">أشتاق إليك</p>
+        <p class="dedication-note" lang="uk">Я сумую за тобою</p>
       </div>
       <a class="hero-scroll" href="#intro" aria-label="Scroll to discover">
         <span>Scroll to discover</span><i aria-hidden="true">↓</i>
