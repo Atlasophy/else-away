@@ -36,9 +36,25 @@
     .hero h1.temporary-dedication { font-size: clamp(72px, 22vw, 320px); line-height: .8; letter-spacing: -.025em; }
     .hero .temporary-signature { margin: 24px 0 0 8px; color: var(--paper); font-size: clamp(114px, 12vw, 156px); }
     .hero .temporary-signature span { right: -12px; height: 15px; border-bottom-width: 1px; }
+    .dedication-translations { position: absolute; inset: 0; z-index: 3; pointer-events: none; }
+    .dedication-note { position: absolute; margin: 0; color: var(--green-deep); font: italic 20px/1.4 var(--serif); white-space: nowrap; text-shadow: 0 1px 5px rgba(244,238,225,.8); }
+    .dedication-note:nth-child(1) { top: 20%; left: 65%; transform: rotate(-7deg); }
+    .dedication-note:nth-child(2) { top: 29%; right: 14%; transform: rotate(6deg); }
+    .dedication-note:nth-child(3) { top: 30%; left: 57%; transform: rotate(-4deg); }
+    .dedication-note:nth-child(n+4) { color: var(--paper); text-shadow: 0 2px 5px rgba(8,18,12,.95); }
+    .dedication-note:nth-child(4) { bottom: 18%; right: 8%; transform: rotate(7deg); }
+    .dedication-note:nth-child(5) { bottom: 10%; left: 50%; transform: rotate(-5deg); }
+    .dedication-note:nth-child(6) { bottom: 6%; right: 18%; transform: rotate(3deg); }
     @media (max-width: 900px) {
       .temporary-hero .hero-content { width: 90%; padding-top: 110px; padding-bottom: 110px; }
       .hero h1.temporary-dedication { font-size: 20.5vw; line-height: .9; }
+      .dedication-note { font-size: 17px; }
+      .dedication-note:nth-child(1) { top: 15%; left: 8%; }
+      .dedication-note:nth-child(2) { top: 22%; right: 6%; }
+      .dedication-note:nth-child(3) { top: 26%; left: 12%; }
+      .dedication-note:nth-child(4) { bottom: 22%; right: auto; left: 11%; }
+      .dedication-note:nth-child(5) { bottom: 16%; right: 7%; left: auto; }
+      .dedication-note:nth-child(6) { bottom: 10%; right: auto; left: 22%; }
     }
   </style>
   <!-- End temporary dedication styles. -->
@@ -79,6 +95,14 @@
         <p class="eyebrow light" data-copy="heroEyebrow">elseaway · A visual journal by Yaren</p>
         <h1 id="hero-title" class="temporary-dedication" lang="tr">SENİ<br>ÖZLEDİM</h1>
         <p class="signature temporary-signature">Atlas<span aria-hidden="true"></span></p>
+      </div>
+      <div class="dedication-translations" role="group" aria-label="I miss you, in other languages">
+        <p class="dedication-note" lang="en">I miss you</p>
+        <p class="dedication-note" lang="fr">Tu me manques</p>
+        <p class="dedication-note" lang="es">Te extraño</p>
+        <p class="dedication-note" lang="it">Mi manchi</p>
+        <p class="dedication-note" lang="pl">Tęsknię za Tobą</p>
+        <p class="dedication-note" lang="ru">Я скучаю по тебе</p>
       </div>
       <a class="hero-scroll" href="#intro" aria-label="Scroll to discover">
         <span>Scroll to discover</span><i aria-hidden="true">↓</i>
