@@ -7,9 +7,9 @@
   <title>elseaway — Studio</title>
   <link rel="icon" href="../assets/favicon.svg" type="image/svg+xml">
   <!-- Bump this asset version whenever Studio CSS or JavaScript changes. -->
-  <link rel="stylesheet" href="/admin/admin.css?v=20261014.2">
-  <script src="/copy-fields.js?v=20261014.2" defer></script>
-  <script src="/admin/admin.js?v=20261014.2" type="module" defer></script>
+  <link rel="stylesheet" href="/admin/admin.css?v=20261026.1">
+  <script src="/copy-fields.js?v=20261026.1" defer></script>
+  <script src="/admin/admin.js?v=20261026.1" type="module" defer></script>
 </head>
 <body>
   <a class="skip-link" href="#workspace">Skip to the editor</a>
@@ -22,7 +22,7 @@
       <button type="button" class="tab" data-view="details">Details</button>
       <button type="button" class="tab" data-view="collaborations">Collaborations</button>
       <button type="button" class="tab" data-view="postcards">Postcards</button>
-      <button type="button" class="tab" data-view="photos">Photographs</button>
+      <button type="button" class="tab" data-view="photos">Photos &amp; videos</button>
     </nav>
     <div class="bar-actions">
       <p class="status" role="status" data-status></p>
@@ -37,7 +37,7 @@
   <div class="dialog-backdrop" data-picker hidden>
     <div class="dialog" role="dialog" aria-modal="true" aria-labelledby="picker-title">
       <div class="dialog-head">
-        <h2 id="picker-title">Choose a photograph</h2>
+        <h2 id="picker-title">Choose a photograph or video</h2>
         <button type="button" class="ghost" data-picker-close>Close</button>
       </div>
       <label class="upload">
@@ -46,8 +46,16 @@
         <span class="upload-title">From your computer</span>
         <small>Upload starts automatically after you choose. Large photographs are resized before they are sent.</small>
       </label>
+      <label class="upload">
+        <input type="file" accept="video/mp4,video/quicktime,video/webm,video/ogg,.mp4,.m4v,.mov,.webm,.ogv" multiple data-upload-video>
+        <span class="upload-action" data-upload-video-action>Choose &amp; upload videos</span>
+        <span class="upload-title">Videos, up to 4K with sound</span>
+        <small>mp4, mov, m4v or webm, up to 5 GB each. Videos are sent as they are, in pieces, so big files are fine — keep the tab open until it finishes.</small>
+      </label>
       <button type="button" class="reconnect" data-reconnect hidden>Reload Studio to reconnect</button>
       <div class="picker-grid" data-picker-grid></div>
+      <h3 class="picker-subhead">Videos</h3>
+      <div class="picker-grid" data-picker-video-grid></div>
     </div>
   </div>
 </body>

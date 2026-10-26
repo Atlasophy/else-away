@@ -156,3 +156,10 @@ button { font: inherit; color: inherit; cursor: pointer; }
 }
 
 .collection-editor-empty { padding-top: 24px; color: var(--muted); }
+
+/* Videos sit beside photographs in every grid; a small badge tells them apart. */
+.photo-thumb video, .picker-grid video { display: block; width: 100%; height: 100%; object-fit: cover; pointer-events: none; }
+.picker-grid video { aspect-ratio: 1; }
+.picker-grid .is-video, .photo-thumb.is-video { position: relative; }
+.media-badge { position: absolute; left: 6px; bottom: 6px; padding: 3px 7px; border-radius: 999px; background: rgba(35,30,23,.78); color: #f4eee1; font: 500 9px/1 var(--mono); letter-spacing: .1em; text-transform: uppercase; pointer-events: none; }
+.picker-subhead { margin: 22px 0 10px; font: 500 10px/1 var(--mono); letter-spacing: .14em; text-transform: uppercase; color: var(--muted); }

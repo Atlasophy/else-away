@@ -268,6 +268,8 @@ footer div { display: flex; gap: 25px; font-size: 9px; letter-spacing: .12em; te
 .postcard-lightbox-close { position: absolute; top: 14px; right: 14px; z-index: 2; width: 38px; height: 38px; border: 1px solid rgba(241,234,220,.5); border-radius: 50%; background: rgba(20,26,20,.4); color: var(--cream); font-size: 15px; }
 .postcard-lightbox-media { position: relative; display: grid; place-items: center; background: var(--green-deep); overflow: hidden; }
 .postcard-lightbox-media img { display: block; width: 100%; height: 100%; max-height: 88vh; object-fit: cover; }
+.postcard-lightbox-media video { display: block; width: 100%; height: 100%; max-height: 88vh; object-fit: contain; background: #000; }
+.postcard-lightbox-media img[hidden], .postcard-lightbox-media video[hidden] { display: none; }
 .postcard-lightbox-nav { position: absolute; top: 50%; display: grid; place-items: center; width: 42px; height: 42px; border: 1px solid rgba(241,234,220,.45); border-radius: 50%; transform: translateY(-50%); background: rgba(20,26,20,.4); color: var(--cream); }
 .postcard-lightbox-nav.prev { left: 16px; }
 .postcard-lightbox-nav.next { right: 16px; }
@@ -281,7 +283,7 @@ footer div { display: flex; gap: 25px; font-size: 9px; letter-spacing: .12em; te
 @media (max-width: 760px) {
   .postcard-lightbox { padding: 0; }
   .postcard-lightbox-inner { grid-template-columns: 1fr; max-height: 100vh; height: 100%; overflow-y: auto; }
-  .postcard-lightbox-media img { max-height: 62vh; }
+  .postcard-lightbox-media img, .postcard-lightbox-media video { max-height: 62vh; }
   .postcard-lightbox-text { padding: 28px 24px 40px; }
 }
 
@@ -303,6 +305,8 @@ footer div { display: flex; gap: 25px; font-size: 9px; letter-spacing: .12em; te
 .collection-card { min-width: 0; }
 .collection-card-link { display: block; width: 100%; padding: 0; border: 0; background: transparent; color: inherit; text-align: left; font: inherit; cursor: pointer; }
 .collection-media { position: relative; aspect-ratio: 4/5; overflow: hidden; background: rgba(127,127,127,.15); }
+.collection-media video { display: block; width: 100%; height: 100%; object-fit: cover; }
+.collection-play { position: absolute; left: 14px; bottom: 14px; display: grid; place-items: center; width: 40px; height: 40px; padding-left: 3px; border-radius: 50%; background: rgba(20,26,20,.62); color: var(--cream); font-size: 13px; pointer-events: none; }
 .collection-media img { display: block; width: 100%; height: 100%; object-fit: cover; transition: transform .3s; }
 .collection-card-link:hover img { transform: scale(1.025); }
 .collection-open { position: absolute; right: 14px; bottom: 14px; display: grid; place-items: center; width: 40px; height: 40px; background: var(--paper); color: var(--ink); font-size: 20px; }

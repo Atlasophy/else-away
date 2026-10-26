@@ -51,9 +51,9 @@ export function validateContent(payload) {
     const country = typeof card.country === 'string' ? card.country.trim() : '';
     const label = [city, country].filter(Boolean).join(', ') || `Postcard ${index + 1}`;
     if (!city && !country) errors.push(`${label} needs at least a city or a country.`);
-    if (!Array.isArray(card.images) || card.images.length === 0) errors.push(`"${label}" has no photograph.`);
+    if (!Array.isArray(card.images) || card.images.length === 0) errors.push(`"${label}" has no photograph or video.`);
     if (Array.isArray(card.images) && card.images.some(image => typeof image !== 'string' || !/^(?:https:\/\/|\/|assets\/)/i.test(image))) {
-      errors.push(`"${label}" has an invalid photograph address.`);
+      errors.push(`"${label}" has an invalid photograph or video address.`);
     }
     for (const [field, limit] of [['city', 120], ['country', 120], ['time', 120], ['note', 5000]]) {
       if (card[field] != null && typeof card[field] !== 'string') errors.push(`"${label}" has an invalid ${field} value.`);
@@ -72,8 +72,8 @@ export function validateContent(payload) {
       for (const [field, limit] of [['title', 160], ['partner', 160], ['location', 160], ['year', 120], ['description', 5000]]) {
         if (project[field] != null && (typeof project[field] !== 'string' || project[field].length > limit)) errors.push(`Collaboration ${index + 1} has an invalid ${field}.`);
       }
-      if (!Array.isArray(project.images) || !project.images.length) errors.push(`Collaboration ${index + 1} needs a photograph.`);
-      else if (project.images.some(image => typeof image !== 'string' || !/^(?:https:\/\/|\/|assets\/)/i.test(image))) errors.push(`Collaboration ${index + 1} has an invalid photograph address.`);
+      if (!Array.isArray(project.images) || !project.images.length) errors.push(`Collaboration ${index + 1} needs a photograph or video.`);
+      else if (project.images.some(image => typeof image !== 'string' || !/^(?:https:\/\/|\/|assets\/)/i.test(image))) errors.push(`Collaboration ${index + 1} has an invalid photograph or video address.`);
     }
   }
   const details = payload.site ?? {};

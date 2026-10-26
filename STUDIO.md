@@ -22,7 +22,7 @@ before it asks again.
 ## The sections
 
 Across the top you'll see **About me**, **Site writing**, **Details**,
-**Collaborations**, **Postcards**, and **Photographs**.
+**Collaborations**, **Postcards**, and **Photos & videos**.
 Whatever you change, nothing goes live until you press **Publish** in the top
 right.
 
@@ -59,13 +59,28 @@ Use **Add photograph** to choose from your uploaded photographs. **Move up** and
 **Move down** change the postcard order. **Remove postcard** removes it from the
 draft; it does not disappear from the public site until you publish.
 
-### Photographs
+### Photos & videos
 
 Everything you've uploaded. Upload straight from your camera or phone — the
 photographs are made smaller before they're sent, so it works on any
 connection and you don't need to resize anything first.
 
-Click a photograph to copy its address if you need it.
+Click a photograph or video to copy its address if you need it.
+
+**Videos** can go in any postcard or collaboration, right alongside photographs.
+In a postcard or collaboration press **Add photo or video**, then use **Choose &
+upload videos**. Videos go up exactly as filmed — 4K and sound included — so
+nothing is squashed, and visitors hear the sound when they press play.
+
+- Use **mp4, mov, m4v or webm**. Phone and camera videos are normally one of these.
+  (Other kinds, like mkv or avi, can't be played by a web browser.)
+- Each video can be up to 5 GB. Big files are sent in pieces, so leave the tab
+  open until the progress finishes. Each piece is retried if the connection
+  drops; if it still fails, nothing half-finished is kept.
+- A small preview picture is made for you from the video. If a postcard or
+  collaboration starts with a video, that preview is its cover.
+- For the smoothest playback for everyone, **H.264 mp4** is the safest choice.
+  Some browsers can't play HEVC (H.265) video from newer phones.
 
 ### Details
 

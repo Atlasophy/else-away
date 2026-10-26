@@ -24,11 +24,11 @@
   <link rel="preload" href="/assets/cormorant-garamond-latin.woff2" as="font" type="font/woff2" crossorigin>
   <title>elseaway by Yaren — Stories from elsewhere</title>
   <!-- Bump this asset version whenever public CSS or JavaScript changes. -->
-  <link rel="stylesheet" href="/styles.css?v=20261014.2">
+  <link rel="stylesheet" href="/styles.css?v=20261026.1">
   <script src="/api/content-script" defer></script>
   <script src="/content.js?v=20260803.1" defer></script>
-  <script src="/copy-fields.js?v=20261014.2" defer></script>
-  <script src="/script.js?v=20261014.2" defer></script>
+  <script src="/copy-fields.js?v=20261026.1" defer></script>
+  <script src="/script.js?v=20261026.1" defer></script>
 </head>
 <body class="home-page">
   <a class="skip-link" href="#main">Skip to content</a>
@@ -170,8 +170,9 @@
         <button type="button" class="postcard-lightbox-close" data-postcard-lightbox-close aria-label="Close">✕</button>
         <div class="postcard-lightbox-media">
           <img data-postcard-lightbox-image src="" alt="">
-          <button type="button" class="postcard-lightbox-nav prev" data-postcard-lightbox-prev aria-label="Previous photograph">←</button>
-          <button type="button" class="postcard-lightbox-nav next" data-postcard-lightbox-next aria-label="Next photograph">→</button>
+          <video data-postcard-lightbox-video controls playsinline preload="metadata" hidden></video>
+          <button type="button" class="postcard-lightbox-nav prev" data-postcard-lightbox-prev aria-label="Previous">←</button>
+          <button type="button" class="postcard-lightbox-nav next" data-postcard-lightbox-next aria-label="Next">→</button>
           <span class="postcard-lightbox-count" data-postcard-lightbox-count aria-live="polite"></span>
         </div>
         <div class="postcard-lightbox-text">

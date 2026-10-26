@@ -9,11 +9,14 @@ const picker = document.querySelector('[data-picker]');
 const pickerGrid = document.querySelector('[data-picker-grid]');
 const pickerDialog = picker.querySelector('[role="dialog"]');
 const uploadInput = document.querySelector('[data-upload-input]');
+const videoInput = document.querySelector('[data-upload-video]');
+const pickerVideoGrid = document.querySelector('[data-picker-video-grid]');
 const reconnectButton = document.querySelector('[data-reconnect]');
 
-const state = { content: null, view: 'about', dirty: false, readOnly: false, images: [], problems: [] };
+const state = { content: null, view: 'about', dirty: false, readOnly: false, images: [], videos: [], problems: [] };
 
 const escape = value => String(value ?? '').replace(/[&<>"]/g, c => ({ '&': '&amp;', '<': '&lt;', '>': '&gt;', '"': '&quot;' }[c]));
+const isVideo = url => /\.(?:mp4|m4v|mov|webm|ogv)(?:[?#].*)?$/i.test(String(url ?? ''));
 const imageSrc = url => (url && (url.startsWith('http') || url.startsWith('/')) ? url : `../${url}`);
 
 function setStatus(message, tone = '') {
@@ -28,8 +31,10 @@ function markDirty() {
 }
 
 function setConnected(connected) {
-  uploadInput.disabled = !connected;
-  uploadInput.closest('.upload').classList.toggle('is-disabled', !connected);
+  for (const input of [uploadInput, videoInput]) {
+    input.disabled = !connected;
+    input.closest('.upload').classList.toggle('is-disabled', !connected);
+  }
   reconnectButton.hidden = connected;
 }
 
@@ -63,12 +68,20 @@ async function load() {
 }
 
 async function loadImages() {
-  if (state.readOnly) { state.images = []; return; }
-  try {
-    const response = await fetch('/api/admin/upload');
-    state.images = (await response.json()).images ?? [];
-  } catch { state.images = []; }
+  if (state.readOnly) { state.images = []; state.videos = []; return; }
+  const [images, videos] = await Promise.all([
+    fetch('/api/admin/upload').then(response => response.json()).catch(() => ({})),
+    fetch('/api/admin/video').then(response => response.json()).catch(() => ({})),
+  ]);
+  state.images = images.images ?? [];
+  state.videos = videos.videos ?? [];
 }
+
+/* One tile for either kind of media. Videos show their own first frame, so the
+   studio needs no extra files to preview them. */
+const mediaTile = (url, alt = '') => isVideo(url)
+  ? `<video src="${escape(url)}#t=0.1" muted playsinline preload="metadata"></video><span class="media-badge">Video</span>`
+  : `<img src="${escape(url)}" alt="${escape(alt)}" loading="lazy">`;
 
 /* ----------------------------------------------------------------- views */
 
@@ -107,14 +120,16 @@ function postcardCard(index, card, kind = 'postcards') {
           <textarea id="pt-${index}" data-field="note" rows="3" placeholder="What this place was like.">${escape(card.note)}</textarea></div>`}
       </div>
       <div class="photo-field">
-        <label>Photographs</label>
+        <label>Photographs &amp; videos</label>
         <div class="photo-grid">
           ${images.map((url, photoIndex) => `
-            <div class="photo-thumb">
-              <img src="${escape(imageSrc(url))}" alt="">
+            <div class="photo-thumb${isVideo(url) ? ' is-video' : ''}">
+              ${isVideo(url)
+                ? `<video src="${escape(imageSrc(url))}#t=0.1" muted playsinline preload="metadata"></video><span class="media-badge">Video</span>`
+                : `<img src="${escape(imageSrc(url))}" alt="">`}
               <button type="button" data-remove-photo="${index}.${photoIndex}" data-remove-kind="${kind}" aria-label="Remove this photograph">✕</button>
             </div>`).join('')}
-          <button type="button" class="ghost add photo-add" data-pick="${kind}.${index}">+ Add photograph</button>
+          <button type="button" class="ghost add photo-add" data-pick="${kind}.${index}">+ Add photo or video</button>
         </div>
       </div>
       <div class="row-actions">
@@ -148,16 +163,23 @@ function viewCollaborations() {
 function viewPhotos() {
   return `
     <div class="view-head">
-      <h1>Photographs</h1>
+      <h1>Photos &amp; videos</h1>
       <p>Everything you have uploaded. Photographs are resized and converted
-         before they are sent, so originals straight from the camera are fine.</p>
+         before they are sent, so originals straight from the camera are fine.
+         Videos go up exactly as they are, 4K and sound included.</p>
     </div>
     <div class="season"><div class="season-body">
-      <button type="button" class="ghost add" data-open-picker="browse">Upload photographs</button>
+      <button type="button" class="ghost add" data-open-picker="browse">Upload photos or videos</button>
       <div class="picker-grid" style="margin-top:18px">
         ${state.images.length
           ? state.images.map(image => `<button type="button" data-copy="${escape(image.url)}"><img src="${escape(image.url)}" alt="${escape(image.alt)}" loading="lazy"></button>`).join('')
-          : '<p class="picker-empty">Nothing uploaded yet.</p>'}
+          : '<p class="picker-empty">No photographs uploaded yet.</p>'}
+      </div>
+      <h3 class="picker-subhead">Videos</h3>
+      <div class="picker-grid">
+        ${state.videos.length
+          ? state.videos.map(video => `<button type="button" class="is-video" data-copy="${escape(video.url)}">${mediaTile(video.url)}</button>`).join('')
+          : '<p class="picker-empty">No videos uploaded yet.</p>'}
       </div>
     </div></div>`;
 }
@@ -286,10 +308,14 @@ async function openPicker(target) {
     document.querySelector('[data-picker-close]').focus();
   }
   pickerGrid.innerHTML = '<p class="picker-empty">Looking…</p>';
+  pickerVideoGrid.innerHTML = '';
   await loadImages();
   pickerGrid.innerHTML = state.images.length
     ? state.images.map(image => `<button type="button" data-choose="${escape(image.url)}"><img src="${escape(image.url)}" alt="${escape(image.alt)}" loading="lazy"></button>`).join('')
-    : '<p class="picker-empty">Nothing uploaded yet. Add a photograph above.</p>';
+    : '<p class="picker-empty">No photographs yet. Add one above.</p>';
+  pickerVideoGrid.innerHTML = state.videos.length
+    ? state.videos.map(video => `<button type="button" class="is-video" data-choose="${escape(video.url)}" aria-label="Video, ${(video.bytes / 1048576).toFixed(0)} MB">${mediaTile(video.url)}</button>`).join('')
+    : '<p class="picker-empty">No videos yet. Add one above.</p>';
 }
 
 document.querySelector('[data-picker-close]').addEventListener('click', closePicker);
@@ -313,7 +339,7 @@ document.addEventListener('keydown', event => {
 
 /* Picking a photograph for a postcard adds it to that card's gallery rather
    than replacing anything, since a postcard can hold as many as Yaren likes. */
-pickerGrid.addEventListener('click', event => {
+const choosePicked = event => {
   const chosen = event.target.closest('[data-choose]');
   if (!chosen || !pickerTarget) return;
   const [kind, a] = pickerTarget.split('.');
@@ -324,7 +350,9 @@ pickerGrid.addEventListener('click', event => {
   markDirty();
   render();
   workspace.querySelector(`[data-pick="${focusTarget}"]`)?.focus();
-});
+};
+pickerGrid.addEventListener('click', choosePicked);
+pickerVideoGrid.addEventListener('click', choosePicked);
 
 /* Resizing here rather than on the server keeps a 12MB camera original off the
    network entirely, and means no image library has to run at the edge. The
@@ -412,7 +440,112 @@ uploadInput.addEventListener('change', async event => {
   }
   event.target.value = '';
   setStatus(`${files.length} photograph${files.length === 1 ? '' : 's'} uploaded`, 'saved');
-  await openPicker(pickerTarget);
+  // The picker may have been closed while the upload ran; only refresh it if it is still open.
+  if (!picker.hidden) await openPicker(pickerTarget);
+});
+
+/* -------------------------------------------------------------- the videos */
+/* A 4K clip with sound can be several gigabytes, so it is never sent whole.
+   The browser cuts it into 32 MB pieces and sends them one at a time to the
+   multipart endpoint, retrying a piece that fails rather than the whole file.
+   Nothing is re-encoded: what Yaren films is what visitors watch. */
+const VIDEO_EXTENSIONS = new Set(['mp4', 'm4v', 'mov', 'webm', 'ogv']);
+const VIDEO_PART_BYTES = 32 * 1024 * 1024;
+
+async function videoApi(action, { method = 'POST', query = {}, body } = {}) {
+  const url = `/api/admin/video?${new URLSearchParams({ action, ...query })}`;
+  const isJson = body !== undefined && !(body instanceof Blob);
+  const response = await fetch(url, { method, body: isJson ? JSON.stringify(body) : body });
+  const result = await response.json().catch(() => ({}));
+  if (!response.ok) throw new Error(result.error ?? 'The video upload failed.');
+  return result;
+}
+
+/* A still from early in the clip, so the site has a cover before the video
+   loads. Best effort only — some codecs cannot be decoded for a still. */
+async function videoPoster(file) {
+  const url = URL.createObjectURL(file);
+  const video = Object.assign(document.createElement('video'), { muted: true, preload: 'auto', playsInline: true, src: url });
+  const once = name => new Promise((resolve, reject) => {
+    video.addEventListener(name, resolve, { once: true });
+    video.addEventListener('error', () => reject(new Error('unreadable')), { once: true });
+  });
+  try {
+    await Promise.race([once('loadeddata'), new Promise((_, reject) => setTimeout(reject, 10000))]);
+    const seeked = once('seeked');
+    video.currentTime = Math.min(1, (video.duration || 2) * 0.1);
+    await Promise.race([seeked, new Promise((_, reject) => setTimeout(reject, 10000))]);
+    const scale = Math.min(1, 1600 / Math.max(video.videoWidth, video.videoHeight));
+    const canvas = document.createElement('canvas');
+    canvas.width = Math.round(video.videoWidth * scale);
+    canvas.height = Math.round(video.videoHeight * scale);
+    canvas.getContext('2d').drawImage(video, 0, 0, canvas.width, canvas.height);
+    return await new Promise(resolve => canvas.toBlob(resolve, 'image/webp', 0.84));
+  } catch {
+    return null;
+  } finally {
+    URL.revokeObjectURL(url);
+  }
+}
+
+async function uploadVideo(file, label) {
+  const { key, uploadId } = await videoApi('create', { body: { name: file.name, size: file.size } });
+  const total = Math.ceil(file.size / VIDEO_PART_BYTES);
+  const parts = [];
+  try {
+    for (let number = 1; number <= total; number += 1) {
+      const piece = file.slice((number - 1) * VIDEO_PART_BYTES, number * VIDEO_PART_BYTES);
+      setStatus(`${label} — ${Math.round(((number - 1) / total) * 100)}%`);
+      for (let attempt = 1; ; attempt += 1) {
+        try {
+          parts.push(await videoApi('part', { method: 'PUT', query: { key, uploadId, part: number }, body: piece }));
+          break;
+        } catch (error) {
+          if (attempt === 3) throw error;
+          await new Promise(resolve => setTimeout(resolve, 1500 * attempt));
+        }
+      }
+    }
+    await videoApi('complete', { body: { key, uploadId, parts } });
+  } catch (error) {
+    await videoApi('abort', { body: { key, uploadId } }).catch(() => {});
+    throw error;
+  }
+  setStatus(`${label} — adding preview…`);
+  const poster = await videoPoster(file);
+  if (poster) await videoApi('poster', { method: 'PUT', query: { key }, body: poster }).catch(() => {});
+  return `/${key}`;
+}
+
+videoInput.addEventListener('change', async event => {
+  const files = [...event.target.files];
+  if (!files.length) return;
+  if (state.readOnly) return setStatus('Session expired — reload the Studio to upload', 'error');
+
+  const unsupported = files.find(file => !VIDEO_EXTENSIONS.has((file.name.split('.').pop() ?? '').toLowerCase()));
+  if (unsupported) {
+    event.target.value = '';
+    return setStatus(`${unsupported.name} can’t be played in a browser. Use mp4, mov, m4v or webm.`, 'error');
+  }
+
+  videoInput.disabled = true;
+  try {
+    for (const [position, file] of files.entries()) {
+      await uploadVideo(file, `Video ${position + 1} of ${files.length}`);
+    }
+    setStatus(`${files.length} video${files.length === 1 ? '' : 's'} uploaded`, 'saved');
+  } catch (error) {
+    setStatus(error.message, 'error');
+  } finally {
+    videoInput.disabled = false;
+    event.target.value = '';
+  }
+  // The picker may have been closed while the upload ran; only refresh it if it is still open.
+  if (!picker.hidden) await openPicker(pickerTarget);
+});
+
+window.addEventListener('beforeunload', event => {
+  if (videoInput.disabled && !state.readOnly) event.preventDefault();
 });
 
 /* -------------------------------------------------------------- publishing */
