@@ -45,6 +45,16 @@ Photographs are resized and converted to webp **in the browser** before upload,
 so originals straight from a camera are fine and nothing large crosses the
 network.
 
+Videos (mp4/mov/m4v/webm, up to 5 GB, 4K with sound) are **not** re-encoded.
+The browser cuts the file into 32 MB pieces and sends them through R2 multipart
+upload (`functions/api/admin/video.js`), because a single Pages Function request
+cannot carry a whole 4K clip. A poster frame is captured in the browser and
+stored beside the video as `<name>.poster.webp`. Videos live under `videos/` in
+R2 and are streamed with byte-range support by `functions/videos/[[key]].js`;
+the list of videos is read straight from R2, so no database migration is
+needed. A video is referenced in a postcard's or collaboration's `images` list
+by its `/videos/...` address.
+
 ## Deploying
 
 The site runs on Cloudflare Pages. The Pages project is connected to this

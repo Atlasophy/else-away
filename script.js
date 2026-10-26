@@ -51,9 +51,17 @@ for (const group of window.ELSE_AWAY_COPY ?? []) {
    flips to a written side on hover; opening it goes to the lightbox, which
    is the only place all of its photographs live at once. */
 const placeLabel = card => card.title || [card.city, card.country].filter(Boolean).join(', ') || 'Somewhere else';
+const videoPattern = /\.(?:mp4|m4v|mov|webm|ogv)(?:[?#].*)?$/i;
+const isVideo = url => videoPattern.test(String(url ?? ''));
+/* Videos uploaded through the studio have a poster frame stored beside them,
+   found by name alone. Videos from elsewhere simply have none. */
+const posterFor = url => /^\/videos\//.test(String(url ?? '')) ? String(url).replace(/\.[^./]+$/, '.poster.webp') : '';
+const countLabel = (count, noun) => count ? `${count} ${noun}${count === 1 ? '' : 's'}` : null;
 const metaLabel = card => {
-  const count = (card.images ?? []).length;
-  const bits = [card.partner, card.location, card.year ?? card.time, count ? `${count} photograph${count === 1 ? '' : 's'}` : null].filter(Boolean);
+  const media = card.images ?? [];
+  const videos = media.filter(isVideo).length;
+  const bits = [card.partner, card.location, card.year ?? card.time,
+    countLabel(media.length - videos, 'photograph'), countLabel(videos, 'video')].filter(Boolean);
   return bits.join(' · ');
 };
 const escapeHTML = value => String(value ?? '').replace(/[&<>"']/g, character => ({
@@ -89,7 +97,12 @@ function renderCollection(host, query = '') {
     const title = placeLabel(card);
     const subtitle = kind === 'collaborations' ? [card.partner, card.location, card.year].filter(Boolean).join(' · ') : [card.country, card.time].filter(Boolean).join(' · ');
     const src = safeImageUrl(card.images?.[0]);
-    const inner = `<div class="collection-media">${src ? `<img src="${escapeHTML(src)}" alt="${escapeHTML(title)}" width="960" height="1200" loading="lazy">` : ''}<span class="collection-open" aria-hidden="true">↗</span></div>
+    const poster = isVideo(src) ? safeImageUrl(posterFor(card.images[0])) : '';
+    const cover = !src ? ''
+      : !isVideo(src) ? `<img src="${escapeHTML(src)}" alt="${escapeHTML(title)}" width="960" height="1200" loading="lazy">`
+      : poster ? `<img src="${escapeHTML(poster)}" alt="${escapeHTML(title)}" width="960" height="1200" loading="lazy" data-video-cover="${escapeHTML(src)}">`
+      : `<video src="${escapeHTML(src)}#t=0.1" muted playsinline preload="metadata" aria-label="${escapeHTML(title)}"></video>`;
+    const inner = `<div class="collection-media">${cover}${isVideo(src) ? '<span class="collection-play" aria-hidden="true">▶</span>' : ''}<span class="collection-open" aria-hidden="true">↗</span></div>
       <div class="collection-card-copy"><p class="collection-meta">${escapeHTML(subtitle)}</p><h3>${escapeHTML(title)}</h3><p class="collection-note">${escapeHTML(card.description ?? card.note)}</p></div>`;
     return `<article class="collection-card">${preview
       ? `<a href="/${kind}/?entry=${index}" class="collection-card-link">${inner}</a>`
@@ -100,7 +113,18 @@ function renderCollection(host, query = '') {
     if (status) status.textContent = `${matches.length} ${kind === 'collaborations' ? 'collaboration' : 'postcard'}${matches.length === 1 ? '' : 's'}`;
   }
 }
-document.querySelectorAll('[data-collection]').forEach(host => renderCollection(host));
+document.querySelectorAll('[data-collection]').forEach(host => {
+  renderCollection(host);
+  // A video whose poster frame is missing falls back to the clip's own first frame.
+  host.addEventListener('error', event => {
+    const cover = event.target;
+    if (!(cover instanceof HTMLImageElement) || !cover.dataset.videoCover) return;
+    const video = document.createElement('video');
+    Object.assign(video, { src: `${cover.dataset.videoCover}#t=0.1`, muted: true, playsInline: true, preload: 'metadata' });
+    video.setAttribute('aria-label', cover.alt);
+    cover.replaceWith(video);
+  }, true);
+});
 document.querySelector('[data-collection-search]')?.addEventListener('input', event => renderCollection(collectionHost, event.target.value));
 if (collectionHost) {
   const query = new URLSearchParams(location.search).get('entry');
@@ -114,6 +138,7 @@ if (collectionHost) {
 const lightbox = document.querySelector('[data-postcard-lightbox]');
 if (lightbox && entries.length) {
   const image = lightbox.querySelector('[data-postcard-lightbox-image]');
+  const video = lightbox.querySelector('[data-postcard-lightbox-video]');
   const meta = lightbox.querySelector('[data-postcard-lightbox-meta]');
   const place = lightbox.querySelector('[data-postcard-lightbox-place]');
   const note = lightbox.querySelector('[data-postcard-lightbox-note]');
@@ -126,10 +151,28 @@ if (lightbox && entries.length) {
   const headerRegion = document.querySelector('[data-header]');
   const backgroundRegions = [...document.querySelectorAll('main > :not([data-postcard-lightbox]), .archive-footer, [data-mobile-menu]')];
 
+  function stopVideo() {
+    video.pause();
+    video.removeAttribute('src');
+    video.removeAttribute('poster');
+    video.load();
+  }
+
   function renderPhoto() {
     const photos = openCard.images ?? [];
     const photoUrl = safeImageUrl(photos[openPhoto]);
-    if (photoUrl) image.src = photoUrl;
+    const playing = isVideo(photoUrl);
+    stopVideo();
+    video.hidden = !playing;
+    image.hidden = playing;
+    if (playing) {
+      // Sound is on by default: this is a deliberate click, not autoplay.
+      video.setAttribute('aria-label', `${placeLabel(openCard)} — video ${openPhoto + 1} of ${photos.length}`);
+      const poster = safeImageUrl(posterFor(photos[openPhoto]));
+      if (poster) video.poster = poster;
+      video.src = photoUrl;
+      image.removeAttribute('src');
+    } else if (photoUrl) image.src = photoUrl;
     else image.removeAttribute('src');
     image.alt = `${placeLabel(openCard)} — photograph ${openPhoto + 1} of ${photos.length}`;
     countLabel.textContent = photos.length > 1 ? `${openPhoto + 1} / ${photos.length}` : '';
@@ -155,6 +198,7 @@ if (lightbox && entries.length) {
   }
 
   function closeLightbox() {
+    stopVideo();
     lightbox.hidden = true;
     document.body.style.overflow = '';
     backgroundRegions.forEach(region => { region.inert = false; });
@@ -183,8 +227,9 @@ if (lightbox && entries.length) {
   document.addEventListener('keydown', event => {
     if (lightbox.hidden) return;
     if (event.key === 'Escape') closeLightbox();
-    if (event.key === 'ArrowLeft') step(-1);
-    if (event.key === 'ArrowRight') step(1);
+    // Arrow keys seek inside a focused video rather than changing slide.
+    if (event.target !== video && event.key === 'ArrowLeft') step(-1);
+    if (event.target !== video && event.key === 'ArrowRight') step(1);
     if (event.key === 'Tab') {
       const controls = [...lightbox.querySelectorAll('button:not([hidden])')];
       const first = controls[0];
